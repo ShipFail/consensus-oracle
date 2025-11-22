@@ -1,0 +1,4 @@
+- Use Firebase Service as backend to manage everything as possible as we can.
+- Use Next.js as both frontend and backend framework to minimize context switching.
+- Use Vertex AI to access multiple LLM providers through Application Default Credentials.
+- Use Tailwind CSS for rapid UI development with a consistent design system.

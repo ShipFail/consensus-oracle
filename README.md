@@ -2,6 +2,10 @@
 
 > *"Many models. One answer. How strong is the world’s prior?"*
 
+<div align="center">
+<img src="./docs/consensus-oracle-logo.webp" alt="AI Consensus Oracle Logo" width=256 height=256/>
+</div>
+
 ## ✨ One‑liner
 
 **LLM Consensus Oracle** is a web app + API that asks multiple frontier LLMs the same question with **deterministic decoding** and measures how strongly they **agree**, exposing hidden *shared priors* in our collective training data.
