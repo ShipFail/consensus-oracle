@@ -81,19 +81,21 @@ This gives you a quick sense of **where models converge or diverge**.
 
 **Frontend**
 
-* Simple single‑page app (Next.js / React or similar)
+* **Next.js** (App Router) for both frontend and API routes
+* **Tailwind CSS** for rapid, consistent UI styling
 * Question input + results panel with:
 
   * model answers
   * consensus meter
 
-**Backend**
+**Backend & Infrastructure**
 
-* Node.js / TypeScript
+* **Firebase** for hosting, backend services, and optional persistence
+* **Vertex AI** (via Google Cloud) to access multiple LLM providers (Gemini, etc.) through a unified interface
 * `/api/ask` endpoint:
 
   * validates the question
-  * calls multiple LLM APIs with deterministic settings
+  * calls multiple LLM APIs via Vertex AI with deterministic settings
   * computes pairwise similarity between answers
   * returns structured JSON to the frontend
 
@@ -103,7 +105,7 @@ This gives you a quick sense of **where models converge or diverge**.
 2. If all strings are equal → `consensusScore = 1.0`
 3. Otherwise:
 
-   * compute embeddings for each answer
+   * compute embeddings for each answer (using Vertex AI embeddings)
    * average pairwise cosine similarity → `consensusScore`
 4. Map score to label:
 
@@ -117,32 +119,51 @@ This gives you a quick sense of **where models converge or diverge**.
 
 > Exact commands may evolve as the codebase matures.
 
-```bash
-git clone https://github.com/YOUR_USER/llm-consensus-oracle.git
-cd llm-consensus-oracle
-npm install  # or pnpm / yarn
-```
+### Prerequisites
 
-Create `.env.local`:
+* Node.js & npm
+* Google Cloud Platform project with Vertex AI API enabled
+* Firebase project (optional for local dev, required for deployment)
+* `gcloud` CLI installed and authenticated
 
-```bash
-cp .env.example .env.local
-```
+### Setup
 
-Fill in the providers you use:
+1. **Clone the repository**
 
-```env
-OPENAI_API_KEY=sk-...
-GEMINI_API_KEY=...
-ANTHROPIC_API_KEY=...
-EMBEDDING_PROVIDER=openai
-```
+   ```bash
+   git clone https://github.com/ShipFail/consensus-oracle.git
+   cd consensus-oracle
+   npm install
+   ```
 
-Run the dev server:
+2. **Configure Google Cloud Credentials**
 
-```bash
-npm run dev
-```
+   Ensure you have Application Default Credentials (ADC) set up so the app can access Vertex AI:
+
+   ```bash
+   gcloud auth application-default login
+   ```
+
+3. **Environment Variables**
+
+   Create `.env.local`:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Configure your Google Cloud project details:
+
+   ```env
+   GOOGLE_CLOUD_PROJECT_ID=your-project-id
+   GOOGLE_CLOUD_LOCATION=us-central1
+   ```
+
+4. **Run the dev server**
+
+   ```bash
+   npm run dev
+   ```
 
 Then open:
 
@@ -217,8 +238,8 @@ PRs, issues, and ideas are very welcome.
 Basic flow:
 
 ```bash
-git clone https://github.com/YOUR_USER/llm-consensus-oracle.git
-cd llm-consensus-oracle
+git clone https://github.com/ShipFail/consensus-oracle.git
+cd consensus-oracle
 npm install
 npm run dev
 ```
