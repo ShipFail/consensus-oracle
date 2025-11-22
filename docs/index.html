@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Priorscope – LLM Consensus Oracle</title>
-  <meta name="description" content="Priorscope is a consensus oracle that compares answers from multiple LLMs to estimate how strongly AI models agree on a question." />
+  <title>LLM Consensus Oracle</title>
+  <meta name="description" content="LLM Consensus Oracle compares answers from multiple LLMs to estimate how strongly AI models agree on a question." />
 
   <!-- Tailwind (Windtail) CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -61,17 +61,15 @@
     <!-- NAVBAR -->
     <header class="fixed inset-x-0 top-0 z-30 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-xl">
       <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 lg:px-0" aria-label="Global">
-        <div class="flex items-center gap-3">
-          <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-500/10 ring-2 ring-brand-500/40">
-            <span class="text-lg font-semibold text-brand-300">π</span>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-sm font-semibold tracking-tight">Priorscope</span>
-            <span class="text-xs text-slate-400">LLM Consensus Oracle</span>
-          </div>
-        </div>
-
-        <div class="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+          <div class="flex items-center gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-500/10 ring-2 ring-brand-500/40">
+              <span class="text-lg font-semibold text-brand-300">π</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold tracking-tight">Consensus Oracle</span>
+              <span class="text-xs text-slate-400">LLM Truth Estimator</span>
+            </div>
+          </div>        <div class="hidden items-center gap-8 text-sm text-slate-300 md:flex">
           <a href="#how-it-works" class="hover:text-brand-200">How it works</a>
           <a href="#use-cases" class="hover:text-brand-200">Use cases</a>
           <a href="#pricing" class="hover:text-brand-200">Pricing</a>
@@ -79,8 +77,8 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <a href="#early-access" class="hidden text-xs font-medium text-slate-300 hover:text-brand-200 md:inline-flex">Sign in</a>
-          <a href="#early-access" class="inline-flex items-center rounded-full bg-brand-500 px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">Get early access</a>
+          <a href="#signin" class="hidden text-xs font-medium text-slate-300 hover:text-brand-200 md:inline-flex">Sign in</a>
+          <a href="#demo" class="inline-flex items-center rounded-full bg-brand-500 px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">Try the Demo</a>
         </div>
       </nav>
     </header>

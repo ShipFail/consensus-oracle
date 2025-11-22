@@ -67,13 +67,15 @@ This works as:
 5. **Deterministic Settings Enforcement**
    Ensure all model calls use the strictest possible deterministic decoding (e.g., `temperature=0`, `top_k=1`, `top_p=1` or equivalent).
 
+6. **User Authentication**
+   Allow users to sign in via Google (Firebase Auth) to save their history across sessions.
+
 ### 3.2 Stretch Goals (Post-MVP / Nice-to-Have)
 
 1. **Public Leaderboard** for questions with highest and lowest consensus.
-2. **User Accounts** and saved question sets.
-3. **Human Voting** on which answer is best / most correct.
-4. **Categorization** of questions: Facts vs Opinions vs Predictions vs Values.
-5. **API Access** exposing consensus scores for external tools.
+2. **Human Voting** on which answer is best / most correct.
+3. **Categorization** of questions: Facts vs Opinions vs Predictions vs Values.
+4. **API Access** exposing consensus scores for external tools.
 
 ### 3.3 Non-Goals
 
@@ -137,13 +139,16 @@ This works as:
    As a *non-technical user*, I want a simple textual label (e.g., “Strong Consensus”, “Partial Consensus”, “Disagreement”) so I understand what the score means.
 
 5. **See My Recent Questions**
-   As a *user*, I want to see the recent questions I asked and their consensus levels, without creating an account, so I can explore patterns.
+   As a *user*, I want to see the recent questions I asked and their consensus levels. If I am logged in, I want this history to persist.
 
 6. **Deterministic Behavior**
    As a *researcher*, I want the system to use deterministic decoding settings so that repeated queries are as stable as possible.
 
 7. **Error Handling**
    As a *user*, I want clear error messages if a model call fails (e.g., rate limit, timeout), so I understand what happened.
+
+8. **Sign In**
+   As a *user*, I want to sign in with my Google account so I can save my questions and access them later.
 
 ### 5.2 Stretch User Stories
 
@@ -313,20 +318,18 @@ This works as:
   * `< 0.7` → **Disagreement**
 * Ensure the score and label are returned in the API response.
 
-### 8.3 Feature: Question History (Session-based)
+### 8.3 Feature: Question History (Session & Persistent)
 
-**Description**: Show the last N questions asked in the current browser session with simplified summary.
+**Description**: Show the last N questions asked. If logged in, persist history to Firebase Firestore.
 
 **Requirements**:
 
-* Store recent questions and metadata (in-memory or localStorage on frontend):
-
-  * Question text
-  * Consensus score
-  * Label
-  * Timestamp
+* **Guest Mode**: Store recent questions in `localStorage` (client-side only).
+* **Auth Mode**:
+  * Allow Google Sign-In via Firebase Auth.
+  * Sync history to Firestore under the user's UID.
 * Display a simple table/list of recent entries below the main interaction area.
-* Allow clicking a history entry to re-open its answers and details (optional for MVP).
+* Allow clicking a history entry to re-open its answers and details.
 
 ### 8.4 Feature: Clear, Explainer UI
 
@@ -405,6 +408,8 @@ This works as:
 ### 10.2 Backend
 
 * Environment: Node.js + TypeScript (ideal), or any serverless runtime.
+* **Authentication**: Firebase Auth (Google Provider).
+* **Database**: Firebase Firestore (for user history).
 * Single main endpoint: `POST /api/ask`
 
   * Request: `{ question: string }`
@@ -514,6 +519,7 @@ To ensure we can finish this in a short hackathon timeframe, the **strict MVP** 
    * Question input box
    * Results panel (consensus meter + answers)
    * Recent session history
+   * **Google Sign-In button**
 
 2. Backend endpoint `POST /api/ask` that:
 
@@ -521,9 +527,13 @@ To ensure we can finish this in a short hackathon timeframe, the **strict MVP** 
    * Computes a consensus score using embeddings
    * Returns JSON for the UI
 
-3. Basic error handling + simple visual states.
+3. **Firebase Integration**:
+   * Auth for login.
+   * Firestore for saving history (if logged in).
 
-Everything else (leaderboard, user accounts, tagging, exports) is **out of scope for MVP**, but we can mention them as future directions in the hackathon pitch.
+4. Basic error handling + simple visual states.
+
+Everything else (leaderboard, tagging, exports) is **out of scope for MVP**, but we can mention them as future directions in the hackathon pitch.
 
 ---
 
