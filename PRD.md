@@ -273,13 +273,14 @@ This works as:
 
 ### 8.1 Feature: Multi-Model Deterministic Answering
 
-**Description**: For each user question, query multiple LLMs with deterministic decoding settings and display each answer.
+**Description**: For each user question, query multiple LLMs in parallel with deterministic decoding settings and display each answer.
 
 **Requirements**:
 
-* Support at least **2 models** in MVP (ideally 3–4):
+* Support at least **2 models** in MVP (ideally 3–4), prioritizing speed and cost:
 
-  * Example: GPT-4.1-mini, Gemini 2.0 Flash, Claude 3.5 Sonnet.
+  * Example: **Gemini 3.0 Flash Lite**, **Claude 4 Haiku**, **Llama 4** (via Vertex AI).
+* **Parallel Execution**: All model API calls must be initiated simultaneously (e.g., `Promise.all`) to minimize total wait time.
 * Use deterministic settings per provider:
 
   * `temperature = 0`
@@ -363,7 +364,7 @@ This works as:
 
 ### 9.1 Performance
 
-* Target end-to-end latency: **< 5 seconds** for 3 models on typical questions.
+* Target end-to-end latency: **< 3 seconds** for 3 models on typical questions (achieved via parallel execution and lightweight models).
 * UI should feel responsive with clear loading indicators.
 
 ### 9.2 Reliability
@@ -413,9 +414,9 @@ This works as:
     {
       "question": "...",
       "models": [
-        { "name": "gpt-4.1-mini", "provider": "openai", "answer": "...", "latencyMs": 800 },
-        { "name": "gemini-2.0-flash", "provider": "google", "answer": "...", "latencyMs": 600 },
-        { "name": "claude-3.5-sonnet", "provider": "anthropic", "answer": "...", "latencyMs": 700 }
+        { "name": "gemini-3.0-flash-lite", "provider": "google", "answer": "...", "latencyMs": 600 },
+        { "name": "claude-4-haiku", "provider": "anthropic", "answer": "...", "latencyMs": 500 },
+        { "name": "llama-4-8b", "provider": "meta", "answer": "...", "latencyMs": 550 }
       ],
       "consensusScore": 0.93,
       "consensusLabel": "strong_consensus",
@@ -426,14 +427,14 @@ This works as:
 
 ### 10.3 External Services
 
-* LLM Providers:
+* LLM Providers (via Vertex AI where possible):
 
-  * OpenAI (for GPT models)
-  * Google (for Gemini)
-  * Anthropic (for Claude) — optional, subject to API access.
+  * **Google**: Gemini 3.0 Flash Lite (Fast, efficient)
+  * **Anthropic**: Claude 4 Haiku (Fastest in class)
+  * **Meta**: Llama 4 (via Vertex Model Garden)
 * Embedding Provider:
 
-  * Could reuse OpenAI or Gemini for embeddings (one model for all answers).
+  * Vertex AI `text-embedding-004` (one model for all answers).
 
 ---
 
@@ -463,7 +464,7 @@ This works as:
 1. **APIs & Cost**
 
    * Multiple model calls per question may be expensive.
-   * Mitigation: limit to 2–3 models; add rate limiting; cache repeated questions.
+   * Mitigation: limit to lightweight models (Flash, Haiku); add rate limiting; cache repeated questions.
 
 2. **Interpretation Risk**
 
@@ -473,7 +474,7 @@ This works as:
 3. **Latency**
 
    * Multiple external calls may be slow.
-   * Mitigation: parallelize requests; pick faster models (e.g., GPT-4.1-mini, Gemini Flash).
+   * Mitigation: **parallelize requests**; pick faster models (Gemini Flash, Haiku).
 
 4. **Model Policy Changes**
 
