@@ -8,7 +8,7 @@ tags:
 ---
 
 > Working title(s): **Consensus Oracle**, **Priorscope**, **Many Minds**
-> Stack: **Next.js** (frontend + backend) + **Firebase Cloud** (hosting + optional persistence)
+> Stack: **Next.js** (frontend + backend) + **Firebase** (hosting + backend) + **Vertex AI** (LLM Gateway) + **Tailwind CSS**
 
 ---
 
@@ -18,7 +18,7 @@ tags:
 
 We started from a simple but deep observation about **deterministic decoding** in LLMs:
 
-* When we set decoding to be **deterministic** (e.g., `temperature = 0`, `top_k = 1`), many different LLMs (GPT, Gemini, Claude Sonnet, LLaMA, etc.) will often answer the prompt:
+* When we set decoding to be **deterministic** (e.g., `temperature = 0`, `top_k = 1`), many different LLMs (Gemini, Claude, Llama, etc.) will often answer the prompt:
 
   > "Tell me a joke."
 
@@ -78,7 +78,7 @@ We intentionally frame this as **“consensus / priors”**, not "the one true a
 
 1. User visits the website.
 2. Enters a **short question** (e.g. "What is the capital of France?", "Who wrote 1984?", "Tell me a joke.").
-3. The app sends that question to multiple LLM providers, each with **deterministic decoding** settings.
+3. The app sends that question to multiple LLM providers in **parallel**, each with **deterministic decoding** settings.
 4. The system collects their answers and computes a **consensus score**.
 5. The UI displays:
 
@@ -94,7 +94,7 @@ We intentionally frame this as **“consensus / priors”**, not "the one true a
 
   * Cards for each model:
 
-    * Model name (e.g., `gpt-4.1-mini`, `gemini-2.0-flash`, `claude-3.5-sonnet`).
+    * Model name (e.g., `gemini-3.0-flash-lite`, `claude-4-haiku`, `llama-4-8b`).
     * Text of the answer.
     * Latency / timing (optional).
   * A large **consensus gauge** (progress bar or radial meter):
