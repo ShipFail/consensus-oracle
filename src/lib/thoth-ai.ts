@@ -1,34 +1,31 @@
 'use server';
 
-import { ai, deterministicConfig } from '@/ai/genkit';
-import { generateGoldenTruthAnswer } from '@/ai/flows/generate-golden-truth-answer';
+import { generateContent } from '@/lib/vertex-client';
+import { generateGoldenTruthAnswer } from '@/lib/golden-truth';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
-import { model } from 'genkit';
 
-const modelReferences = [
-  model('googleai/gemini-2.5-flash'),
-  model('googleai/gemini-pro'),
+const modelNames = [
+  'googleai/gemini-2.5-flash',
+  'googleai/gemini-pro',
 ];
 
 async function getSingleAnswer(
   question: string,
-  modelRef: (typeof modelReferences)[number]
+  modelName: string
 ): Promise<ModelAnswer> {
   try {
-    const { output } = await ai.generate({
-      model: modelRef,
-      prompt: `You are an AI Model. In one or two sentences, provide the best possible answer for the following question. Be direct and concise. Question: ${question}`,
-      output: { format: 'text' },
-      config: deterministicConfig,
-    });
+    const prompt = `You are an AI Model. In one or two sentences, provide the best possible answer for the following question. Be direct and concise. Question: ${question}`;
+    
+    const output = await generateContent(modelName, prompt, { temperature: 0, topK: 1 });
+    
     return {
-      modelName: modelRef.name.replace('googleai/',''),
+      modelName: modelName.replace('googleai/', ''),
       answer: output || 'No answer could be generated.',
     };
   } catch (error) {
-    console.error(`Error getting answer from ${modelRef.name}:`, error);
+    console.error(`Error getting answer from ${modelName}:`, error);
     return {
-      modelName: modelRef.name,
+      modelName: modelName,
       answer: 'Model unavailable for this query.',
     };
   }
@@ -38,7 +35,7 @@ export async function getThothAnswer(
   question: string,
   id: string
 ): Promise<GoldenTruthResult> {
-  const answerPromises = modelReferences.map((ref) => getSingleAnswer(question, ref));
+  const answerPromises = modelNames.map((name) => getSingleAnswer(question, name));
   const modelAnswers = await Promise.all(answerPromises);
 
   const validAnswers = modelAnswers
