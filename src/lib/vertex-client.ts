@@ -35,6 +35,17 @@ interface GenerateContentResponse {
   }
 }
 
+interface AnthropicResponse {
+  content?: {
+    text: string;
+    type: string;
+  }[];
+  usage?: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+}
+
 export async function generateContent(
   model: string,
   prompt: string,
@@ -47,10 +58,46 @@ export async function generateContent(
     throw new Error("GCP_PROJECT_ID is missing.");
   }
 
-  // Handle model names that might have prefixes like 'googleai/' or 'models/'
-  const cleanModel = model.replace(/^googleai\//, '').replace(/^models\//, '');
+  // Determine publisher and clean model name
+  let publisher = 'google';
+  let cleanModel = model;
+  let isAnthropic = false;
 
-  const endpoint = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/${cleanModel}:generateContent`;
+  if (model.startsWith('anthropic/') || model.includes('claude')) {
+    publisher = 'anthropic';
+    isAnthropic = true;
+    cleanModel = model.replace(/^anthropic\//, '');
+  } else {
+    cleanModel = model.replace(/^googleai\//, '').replace(/^models\//, '');
+  }
+
+  const method = isAnthropic ? 'rawPredict' : 'generateContent';
+  const endpoint = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION}/publishers/${publisher}/models/${cleanModel}:${method}`;
+
+  let body: any;
+
+  if (isAnthropic) {
+    // Anthropic (Claude) Request Format
+    body = {
+      anthropic_version: "vertex-2023-10-16",
+      messages: [
+        { role: "user", content: prompt }
+      ],
+      max_tokens: config?.maxOutputTokens || 1024,
+      temperature: config?.temperature,
+      top_p: config?.topP,
+      top_k: config?.topK,
+    };
+  } else {
+    // Google (Gemini) Request Format
+    body = {
+      contents: [{
+        role: 'user',
+        parts: [{ text: prompt }]
+      }],
+      generationConfig: config
+    };
+  }
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -58,26 +105,26 @@ export async function generateContent(
       'Authorization': `Bearer ${accessToken.token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      contents: [{
-        role: 'user',
-        parts: [{ text: prompt }]
-      }],
-      generationConfig: config
-    })
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Vertex AI API Error (${response.status}): ${errorText}`);
+    throw new Error(`Vertex AI API Error (${response.status}) for ${model}: ${errorText}`);
   }
 
-  const data = (await response.json()) as GenerateContentResponse;
-  
-  if (!data.candidates || data.candidates.length === 0) {
+  if (isAnthropic) {
+    const data = (await response.json()) as AnthropicResponse;
+    if (!data.content || data.content.length === 0) {
       return "";
+    }
+    return data.content.map(c => c.text).join('');
+  } else {
+    const data = (await response.json()) as GenerateContentResponse;
+    if (!data.candidates || data.candidates.length === 0) {
+        return "";
+    }
+    // Combine all text parts if there are multiple
+    return data.candidates[0].content.parts.map(p => p.text).join('');
   }
-  
-  // Combine all text parts if there are multiple
-  return data.candidates[0].content.parts.map(p => p.text).join('');
 }

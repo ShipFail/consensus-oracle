@@ -5,8 +5,8 @@ import { generateGoldenTruthAnswer } from '@/lib/golden-truth';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
 
 const modelNames = [
-  'googleai/gemini-2.5-flash',
-  'googleai/gemini-pro',
+  'googleai/gemini-3.0-flash-lite',
+  'anthropic/claude-haiku-4.5',
 ];
 
 async function getSingleAnswer(
@@ -19,7 +19,7 @@ async function getSingleAnswer(
     const output = await generateContent(modelName, prompt, { temperature: 0, topK: 1 });
     
     return {
-      modelName: modelName.replace('googleai/', ''),
+      modelName: modelName.replace(/^(googleai|anthropic)\//, ''),
       answer: output || 'No answer could be generated.',
     };
   } catch (error) {
