@@ -1,1 +1,5 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/summarize-model-agreement.ts';
+import '@/ai/flows/generate-golden-truth-answer.ts';
