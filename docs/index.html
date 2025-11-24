@@ -99,7 +99,7 @@
             </h1>
 
             <p class="text-pretty text-sm leading-relaxed text-slate-300 sm:text-base">
-              Priorscope asks multiple frontier models (Gemini, GPT, Claude & more) your question with deterministic settings
+              Consensus Oracle asks multiple frontier models (Gemini, Claude, Llama & more) your question with deterministic settings
               and measures how strongly their answers align. High agreement → strong shared prior. Low agreement → ambiguity,
               controversy, or hallucination risk.
             </p>
@@ -151,7 +151,7 @@
               <div class="space-y-2.5 text-[11px]">
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-900/80 px-3 py-2">
                   <div class="mb-1 flex items-center justify-between">
-                    <span class="font-medium text-slate-200">GPT-4.1</span>
+                    <span class="font-medium text-slate-200">Gemini 3.0 Flash Lite</span>
                     <span class="text-[10px] text-slate-500">deterministic</span>
                   </div>
                   <p class="text-slate-300">Why did the chicken cross the road? To get to the other side.</p>
@@ -159,7 +159,7 @@
 
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-900/80 px-3 py-2">
                   <div class="mb-1 flex items-center justify-between">
-                    <span class="font-medium text-slate-200">Gemini 2.0</span>
+                    <span class="font-medium text-slate-200">Claude 4 Haiku</span>
                     <span class="text-[10px] text-slate-500">deterministic</span>
                   </div>
                   <p class="text-slate-300">Why did the chicken cross the road? To get to the other side.</p>
@@ -167,7 +167,7 @@
 
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-900/80 px-3 py-2">
                   <div class="mb-1 flex items-center justify-between">
-                    <span class="font-medium text-slate-200">Claude 3.5 Sonnet</span>
+                    <span class="font-medium text-slate-200">Llama 4</span>
                     <span class="text-[10px] text-slate-500">deterministic</span>
                   </div>
                   <p class="text-slate-300">Why did the chicken cross the road? To get to the other side.</p>
@@ -193,8 +193,8 @@
         <div class="mx-auto max-w-6xl px-4 py-16 lg:px-0 lg:py-20">
           <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">How Priorscope works</h2>
-              <p class="mt-1 max-w-xl text-sm text-slate-400">Under the hood, Priorscope calls multiple models with deterministic
+              <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">How Consensus Oracle works</h2>
+              <p class="mt-1 max-w-xl text-sm text-slate-400">Under the hood, Consensus Oracle calls multiple models with deterministic
                 decoding and uses embeddings to compute how aligned their answers are.</p>
             </div>
             <p class="max-w-xs text-xs text-slate-500">Designed as a low-friction API and dashboard you can drop into eval
@@ -205,21 +205,21 @@
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/20 text-[13px] text-brand-100">1</div>
               <h3 class="text-sm font-semibold text-slate-50">Ask one question</h3>
-              <p class="text-xs text-slate-400">Submit a short, well-posed question via the web UI or API. Priorscope
+              <p class="text-xs text-slate-400">Submit a short, well-posed question via the web UI or API. Consensus Oracle
                 normalizes and logs it for reproducible experiments.</p>
             </div>
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/20 text-[13px] text-brand-100">2</div>
               <h3 class="text-sm font-semibold text-slate-50">Query multiple models</h3>
-              <p class="text-xs text-slate-400">We call Gemini, GPT, Claude (and optionally open-source models) with
+              <p class="text-xs text-slate-400">We call Gemini, Claude, Llama (and optionally open-source models) with
                 temperature 0 and greedy decoding to remove randomness and expose the underlying priors.</p>
             </div>
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/20 text-[13px] text-brand-100">3</div>
               <h3 class="text-sm font-semibold text-slate-50">Compute consensus score</h3>
-              <p class="text-xs text-slate-400">Answers are embedded into a shared vector space; Priorscope calculates a
+              <p class="text-xs text-slate-400">Answers are embedded into a shared vector space; Consensus Oracle calculates a
                 consensus score and surfaces agreements, disagreements, and edge cases.</p>
             </div>
           </div>
@@ -231,7 +231,7 @@
         <div class="mx-auto max-w-6xl px-4 py-16 lg:px-0 lg:py-20">
           <div class="mb-8 flex flex-col gap-3">
             <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Where consensus signals shine</h2>
-            <p class="max-w-2xl text-sm text-slate-400">Consensus isn’t absolute truth, but it’s a powerful heuristic. Priorscope
+            <p class="max-w-2xl text-sm text-slate-400">Consensus isn’t absolute truth, but it’s a powerful heuristic. Consensus Oracle
               helps you see where your AI systems are confidently aligned vs. potentially hallucinating.</p>
           </div>
 
@@ -275,7 +275,7 @@
               <div class="text-left">
                 <p class="text-xs font-semibold uppercase tracking-wide text-brand-200">Hackathon Early Access</p>
                 <p class="mt-1 text-lg font-semibold text-slate-50">Free while we’re in beta</p>
-                <p class="mt-1 text-xs text-slate-400">Bring Priorscope to your next hackathon project or internal experiment.
+                <p class="mt-1 text-xs text-slate-400">Bring Consensus Oracle to your next hackathon project or internal experiment.
                   No credit card required for early access.</p>
               </div>
               <div class="text-left md:text-right">
@@ -324,7 +324,7 @@
                   Request early access
                 </button>
               </form>
-              <p class="text-[11px] text-slate-500">We’ll only email you about Priorscope’s beta. No spam.</p>
+              <p class="text-[11px] text-slate-500">We’ll only email you about Consensus Oracle’s beta. No spam.</p>
             </div>
           </div>
         </div>
@@ -336,7 +336,7 @@
           <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Questions & caveats</h2>
-              <p class="mt-1 max-w-xl text-sm text-slate-400">Priorscope is a tool for measuring consensus, not a final arbiter of
+              <p class="mt-1 max-w-xl text-sm text-slate-400">Consensus Oracle is a tool for measuring consensus, not a final arbiter of
                 truth. Here’s how we think about that.</p>
             </div>
           </div>
@@ -363,7 +363,7 @@
             </div>
 
             <div class="rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
-              <h3 class="text-sm font-semibold text-slate-50">Is Priorscope production-ready?</h3>
+              <h3 class="text-sm font-semibold text-slate-50">Is Consensus Oracle production-ready?</h3>
               <p class="mt-2 text-xs text-slate-400">Today it’s a fast-moving MVP aimed at hackathons, internal tools, and
                 research workflows. If you’re exploring production integration, we’d love to chat.</p>
             </div>
@@ -376,7 +376,7 @@
     <footer class="border-t border-slate-800/80 bg-slate-950/95">
       <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-[11px] text-slate-500 md:flex-row md:items-center md:justify-between lg:px-0">
         <p>
-          © <span id="year">2025</span> Priorscope. Built for hackathons & thoughtful AI teams.
+          © <span id="year">2025</span> Consensus Oracle. Built for hackathons & thoughtful AI teams.
         </p>
         <div class="flex flex-wrap items-center gap-3">
           <a href="#" class="hover:text-slate-200">Changelog</a>
@@ -392,7 +392,7 @@
     <div class="relative h-full w-full max-w-2xl p-4 md:h-auto">
       <div class="relative rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-xl">
         <div class="mb-3 flex items-center justify-between">
-          <h3 class="text-sm font-semibold text-slate-50">See Priorscope in action</h3>
+          <h3 class="text-sm font-semibold text-slate-50">See Consensus Oracle in action</h3>
           <button type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700" data-modal-hide="demo-modal">
             <span class="sr-only">Close modal</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">

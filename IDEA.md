@@ -7,7 +7,7 @@ tags:
   - oracle
 ---
 
-> Working title(s): **Consensus Oracle**, **Priorscope**, **Many Minds**
+> Working title(s): **Consensus Oracle**, **Many Minds**
 > Stack: **Next.js** (frontend + backend) + **Firebase** (hosting + backend) + **Vertex AI** (LLM Gateway) + **Tailwind CSS**
 
 ---
@@ -99,9 +99,9 @@ We intentionally frame this as **“consensus / priors”**, not "the one true a
     * Latency / timing (optional).
   * A large **consensus gauge** (progress bar or radial meter):
 
-    * e.g., 95% → **Strong consensus** (green)
-    * 75% → **Partial consensus** (yellow)
-    * 45% → **Disagreement** (red)
+    * e.g., 95% → **Strong consensus**
+    * 75% → **Partial consensus**
+    * 45% → **Disagreement**
 
 ---
 
@@ -157,9 +157,9 @@ We can start with **2 models** (e.g. GPT + Gemini) for simplicity, and add Claud
 
 4. Map consensus score to human-friendly labels:
 
-   * ≥ 0.90 → **Strong consensus** (green)
-   * 0.70–0.90 → **Partial consensus** (yellow)
-   * < 0.70 → **Disagreement** (red)
+   * ≥ 0.90 → **Strong consensus**
+   * 0.70–0.90 → **Partial consensus**
+   * < 0.70 → **Disagreement**
 
 This gives us a **quick, explainable metric** that’s good enough for a hackathon demo.
 

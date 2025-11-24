@@ -36,7 +36,7 @@ You get a web UI and an API that tell you, in one call, whether many independent
 We built **LLM Consensus Oracle** to answer a simple question:  
 > “Do different LLMs really agree on this answer, or is this just one model’s hallucination?”
 
-Instead of calling a single model, we hit **Gemini, Claude, and Llama** with **deterministic decoding** for the same question, then compute how similar their answers are. We turn that into a **consensus meter**: green for strong agreement, yellow for partial, red for disagreement.
+Instead of calling a single model, we hit **Gemini, Claude, and Llama** with **deterministic decoding** for the same question, then compute how similar their answers are. We turn that into a **consensus meter** indicating strong agreement, partial agreement, or disagreement.
 
 In the demo, we’ll show three questions:
 
