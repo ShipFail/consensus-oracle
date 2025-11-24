@@ -3,7 +3,6 @@
 import { ai } from '@/ai/genkit';
 import { generateGoldenTruthAnswer } from '@/ai/flows/generate-golden-truth-answer';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
-import { generate as genkitGenerate } from 'genkit';
 
 const modelNames = ['Model Alpha', 'Model Beta', 'Model Gamma'];
 
@@ -12,7 +11,7 @@ async function getSingleAnswer(
   modelName: string
 ): Promise<ModelAnswer> {
   try {
-    const { output } = await genkitGenerate({
+    const { output } = await ai.generate({
       model: ai.model,
       prompt: `You are AI Model ${modelName}. In one or two sentences, provide the best possible answer for the following question. Be direct and concise. Question: ${question}`,
       output: { format: 'text' },
