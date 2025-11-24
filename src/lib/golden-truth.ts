@@ -38,10 +38,10 @@ Please ensure the "goldenTruthAnswer" directly answers the "question" based on t
 `;
 
   try {
-    // Using gemini-1.5-flash as a good balance of speed and reasoning for this aggregation task
+    // Using gemini-3.0-flash-lite as a good balance of speed and reasoning for this aggregation task
     // We request JSON output via responseMimeType
     const responseText = await generateContent(
-      'gemini-1.5-flash', 
+      'gemini-3.0-flash-lite', 
       prompt, 
       { 
         temperature: 0.5, 
