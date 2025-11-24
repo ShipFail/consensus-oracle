@@ -3,7 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { generateGoldenTruthAnswer } from '@/ai/flows/generate-golden-truth-answer';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
-import { generate as genkitGenerate } from 'genkit/generate';
+import { generate as genkitGenerate } from 'genkit';
 
 const modelNames = ['Model Alpha', 'Model Beta', 'Model Gamma'];
 
@@ -19,7 +19,7 @@ async function getSingleAnswer(
     });
     return {
       modelName,
-      answer: output() || 'No answer could be generated.',
+      answer: output || 'No answer could be generated.',
     };
   } catch (error) {
     console.error(`Error getting answer from ${modelName}:`, error);
