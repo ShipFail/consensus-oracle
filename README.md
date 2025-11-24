@@ -6,15 +6,15 @@
 <img src="./docs/consensus-oracle-logo.webp" alt="AI Consensus Oracle Logo" width=256 height=256/>
 </div>
 
-**Thoth** is a web app + API that asks multiple frontier LLMs the same question with **deterministic decoding**, measures how strongly they agree, and returns a **single golden answer plus a consensus score**, so humans and agents can treat it as a practical **source‑of‑truth signal** instead of trusting a single model.
+**Thoth** is a web app + API that asks multiple frontier LLMs the same question, treats each model's highest‑confidence answer as its vote, and when they agree, returns a **single golden truth answer plus a truth‑confidence score**, so humans and agents can treat it as a practical **golden truth signal** instead of trusting a single model.
 
-> Mental model: **One question → many models → one golden answer + consensus score.**
+> Mental model: **One question → many models → one golden truth answer + truth‑confidence score.**
 
 ---
 
 ## ✨ Why Thoth
 
-When people want the truth today, they usually:
+When people want a **truthful answer they can trust** today, they usually:
 
 - Ask friends or search the web and get conflicting answers, or
 - Ask **one** LLM (often ChatGPT) and trust it blindly.
@@ -23,16 +23,16 @@ Meanwhile:
 
 - Different sources often **disagree**.
 - LLMs sometimes **hallucinate**.
-- There is **no canonical place** that says:
-  > "Here is what the best models in the world all agree is the answer."
+- There is **no single place** that says:
+  > "Here is the golden truth answer, backed by agreement from the best models available today."
 
-Thoth turns the models themselves into a **modern oracle**:
+Thoth turns the models themselves into a **golden truth oracle**:
 
 1. Use **greedy, deterministic decoding** so each model gives its **highest‑confidence answer**.
 2. Ask multiple **frontier models from different vendors** the same question.
 3. Only speak with authority when they **strongly agree**.
 
-The result is a **golden answer** plus a **consensus score** that reflects how stable that answer is across models.
+The result is a **golden truth answer** plus a **truth‑confidence score** that reflects how stable that answer is across models.
 
 ---
 
@@ -44,14 +44,14 @@ The result is a **golden answer** plus a **consensus score** that reflects how s
    - Claude 4 Haiku
    - Llama 4 (via Model Garden)
 3. Thoth **compares their answers** (exact match + embeddings).
-4. Thoth computes a **consensus score** in `[0, 1]` and a label:
-   - **Strong consensus** — models strongly agree; safe to treat as golden answer
-   - **Partial consensus** — some agreement, some variation; use with caution
-   - **Disagreement** — models diverge; no single golden answer
+4. Thoth computes a **truth‑confidence score** in `[0, 1]` and a label:
+  - **Strong agreement** — models strongly agree; safe to treat as a golden truth answer
+  - **Partial agreement** — some agreement, some variation; use with caution
+  - **Disagreement** — models diverge; no single golden truth answer
 5. Thoth returns:
-   - A **golden answer** when consensus is strong
-   - Each model’s raw answer for transparency
-   - The consensus score + label
+  - A **golden truth answer** when agreement is strong
+  - Each model’s raw answer for transparency
+  - The truth‑confidence score + label
 
 You can:
 
@@ -68,7 +68,7 @@ Thoth is deliberately built on a focused, opinionated stack:
 - **Backend & Hosting**: Firebase
   - Firebase Hosting for serving the Next.js app.
   - Firebase Auth for user sign‑in (optional but recommended).
-  - Firestore for logging questions, answers, and consensus scores.
+  - Firestore for logging questions, answers, and truth‑confidence scores.
 - **LLM Gateway**: Vertex AI
   - Access Gemini, Claude, Llama (and others) through a single, managed interface.
   - Use **Application Default Credentials (ADC)** instead of hard‑coding provider keys.
@@ -79,13 +79,13 @@ Thoth is deliberately built on a focused, opinionated stack:
 - `app/page.tsx` — main **Ask Thoth** page.
 - `app/api/thoth/route.ts` — API route that:
   - Validates the question.
-  - Calls Vertex AI for multiple models in parallel with `temperature = 0`, `top_k = 1`.
-  - Computes the consensus score and label.
-  - Selects a golden answer when appropriate.
+  - Calls Vertex AI for multiple models in parallel with **greedy, deterministic decoding** (for example, `temperature = 0`, `top_k = 1`).
+  - Computes the truth‑confidence score and label.
+  - Selects a golden truth answer when appropriate.
 - Firestore collections for:
   - `questions` (question text, user, timestamp)
   - `answers` (per‑model answers, latencies)
-  - `consensus` (score, label, golden answer)
+  - `consensus` (truth‑confidence score, label, golden truth answer)
 
 ---
 
@@ -153,7 +153,7 @@ Ask questions like:
 - `What is the capital of France?`
 - `Who wrote 1984?`
 
-…and watch Thoth return a golden answer and a consensus score.
+…and watch Thoth return a golden truth answer and a truth‑confidence score.
 
 ---
 

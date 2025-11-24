@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Thoth — Cross‑Model Source of Truth</title>
-  <meta name="description" content="Thoth asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a golden answer plus a consensus score." />
+  <meta name="description" content="Thoth asks multiple frontier LLMs the same question with deterministic decoding, treats each model's highest-confidence answer as its vote, and when they agree, returns a golden truth answer plus a truth-confidence score." />
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -76,7 +76,7 @@
 
             <p class="text-pretty text-sm leading-relaxed text-slate-300 sm:text-base">
               Thoth asks multiple frontier LLMs the same question with deterministic decoding, compares their answers, and
-              returns a <span class="font-semibold">golden answer</span> plus a <span class="font-semibold">consensus score</span>.
+              returns a <span class="font-semibold">golden truth answer</span> plus a <span class="font-semibold">truth-confidence score</span>.
               When the best models all say the same thing, you can safely treat it as a strong source‑of‑truth signal.
             </p>
 
@@ -102,7 +102,7 @@
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
-                <span>Golden answer + consensus score</span>
+                <span>Golden truth answer + truth-confidence score</span>
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
@@ -125,7 +125,7 @@
               </div>
 
               <div class="mb-3 rounded-2xl border border-slate-800/80 bg-slate-950/80 px-3 py-2">
-                <p class="text-[10px] font-medium uppercase tracking-wide text-slate-400">Golden answer</p>
+                <p class="text-[10px] font-medium uppercase tracking-wide text-slate-400">Golden truth answer</p>
                 <p class="mt-1 text-[11px] text-slate-100">Why did the chicken cross the road? To get to the other side.</p>
               </div>
 
@@ -176,7 +176,7 @@
             <div>
               <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">How Thoth works</h2>
               <p class="mt-1 max-w-xl text-sm text-slate-400">Under the hood, Thoth calls multiple models with deterministic decoding,
-                compares their answers, and selects a golden answer only when consensus is strong.</p>
+                compares their answers, and selects a golden truth answer only when agreement is strong.</p>
             </div>
             <p class="max-w-xs text-xs text-slate-500">Designed as a low‑friction API and dashboard you can drop into eval pipelines,
               agent frameworks, or research experiments.</p>
@@ -199,9 +199,9 @@
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-[13px] text-slate-100">3</div>
-              <h3 class="text-sm font-semibold text-slate-50">Compute consensus & golden answer</h3>
+              <h3 class="text-sm font-semibold text-slate-50">Compute truth-confidence & golden truth answer</h3>
               <p class="text-xs text-slate-400">Answers are compared using exact match and embeddings; Thoth calculates a consensus
-                score and, when agreement is strong, surfaces a single golden answer plus per‑model details.</p>
+                score and, when agreement is strong, surfaces a single golden truth answer plus per‑model details.</p>
             </div>
           </div>
         </div>

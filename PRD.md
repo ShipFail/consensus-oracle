@@ -1,6 +1,6 @@
-# Project PRD: Thoth — Cross‑Model Source of Truth
+# Project PRD: Thoth — Golden Truth from Cross‑Model Agreement
 
-> A web app that asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a **single golden answer plus a consensus score** so humans and agents can treat it as a practical source‑of‑truth signal.
+> A web app that asks multiple frontier AI models the same question, treats each model's highest‑confidence answer as its vote, and when they agree, returns a **single golden truth answer plus a confidence signal** that people and agents can rely on as today's best practical source of truth.
 
 ---
 
@@ -8,67 +8,50 @@
 
 ### 1.1 Problem
 
-When people want a reliable answer today, they usually:
+When people want a **truthful answer they can trust**, they usually:
 
-- Ask friends, read blogs, and search the web — and get **conflicting answers**.
-- Or ask **one** LLM (often ChatGPT) and **trust it blindly**.
+- Search the web, read blogs, ask friends or experts — and get **conflicting answers**.
+- Or ask **one** AI assistant (often ChatGPT) and **trust it blindly**, even when other strong models might disagree.
 
 In reality:
 
-- Different information sources regularly **disagree**.
-- LLMs sometimes **hallucinate**.
-- There is **no canonical place** that says:
-  > "Here is what the best models in the world all agree is the answer."
+- Different information sources (web pages, experts, tools, single models) regularly **contradict each other**.
+- It is hard for non‑experts to tell which answer is **most trustworthy**.
+- There is **no single place** that says:
+   > "Here is the golden truth answer, backed by agreement from the best models available today."
 
-At the same time, frontier LLMs (Gemini, Claude, Llama, etc.)
+At the same time, modern AI models:
 
-- Are trained on **huge overlapping slices** of human text.
-- Already act as **de facto oracles** for millions of users.
+- Are trained on **vast overlapping slices** of human knowledge.
+- Already act as the **default information source** for millions of people.
+- Are often treated as **authorities**, especially when people consult one model and accept its output as fact.
 
-When we set decoding to be **deterministic** (`temperature = 0`, greedy / `top_k = 1`) and ask multiple models the same question — e.g.:
+This leads to a central pain point:
 
-> "Tell me a joke."
-
-They often **collapse to essentially the same classic chicken joke**.
-
-This suggests that:
-
-- There exists a **dominant, universal, statistically highest‑probability answer** to some questions across human training data.
-- Deterministic decoding across models acts as a probe into this **shared prior**.
-
-What’s missing today is a **single service** where you can:
-
-- Ask a question once.
-- Have **multiple top models** answer deterministically.
-- See whether they **converge** or **conflict**.
-- Get back a **golden answer + consensus score** when they converge.
-
-That is what Thoth provides.
+> People and agents want a **golden truth answer with the highest confidence available today**, but they have no structured way to compare strong models, measure agreement, and know **when to trust** an answer.
 
 ### 1.2 Opportunity
 
-We can turn this idea into a concrete product:
+We can turn this into a product that:
 
-- A **web app** where users ask questions and get:
-  - A golden answer.
-  - A consensus score and label.
-  - Per‑model answers for transparency.
-- An **API** where agents and tools can ask:
-  > "Is there a stable, high‑confidence answer here that many strong models agree on?"
+- Treats **frontier AI models** as today's strongest information sources.
+- Interprets each model's answer (under consistent, deterministic settings) as its **highest‑confidence vote**.
+- **Cross‑checks** these votes across models from different providers.
+- When they agree, surfaces a **single golden truth answer** and a **confidence signal** representing how strong that agreement is.
 
-This serves as:
+This becomes:
 
-- A **source‑of‑truth layer** for agents and workflows.
-- A **research tool** for studying model priors and disagreements.
-- A **demo/teaching tool** for explaining how LLMs encode human knowledge.
+- A **place to ask for the golden truth answer** to a question.
+- A **source‑of‑truth layer** for agents and workflows that need a high‑confidence check before taking action.
+- A **lens on disagreement**, showing users where models diverge instead of pretending there is one stable answer.
 
 ---
 
 ## 2. Vision & Product Statement
 
-> **Vision**: Give humans and agents a single place to ask for the **best available answer** today, grounded in cross‑model deterministic agreement.
+> **Vision**: Give humans and AI agents a single, trusted place to ask for the **golden truth answer** — the answer that today's strongest models independently converge on — along with a clear signal of how confident that truth is.
 
-> **Product Statement**: **Thoth** is a web app that asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a **golden answer plus a consensus score**. When the best models all say the same thing, Thoth surfaces that as a strong source‑of‑truth signal; when they diverge, Thoth exposes the disagreement instead of pretending there is one answer.
+> **Product Statement**: **Thoth** is a web app that asks multiple frontier AI models the same question, interprets each models response as its highest‑confidence answer, and measures how strongly those answers agree. When they converge, Thoth returns a **golden truth answer plus a confidence score and label**; when they diverge, Thoth exposes the disagreement instead of pretending there is one truth.
 
 ---
 
@@ -76,40 +59,40 @@ This serves as:
 
 ### 3.1 Goals (MVP)
 
-1. **Cross‑Model Deterministic Answering**  
-   For any short question, show deterministic answers from multiple strong LLMs, all run with strict deterministic decoding.
+1. **Golden Truth Answering from Multiple Models**  
+   For any short question, gather top answers from multiple strong models and present them in a way that makes agreement and disagreement obvious.
 
-2. **Consensus Measurement & Golden Answer**  
-   Compute and display a **consensus score** (0–1 / 0–100%) and label, and when consensus is strong, select and return a **single golden answer**.
+2. **Truth Confidence Measurement & Golden Truth Answer**  
+   Compute and display a **truth‑confidence score** and an interpretable label, and when confidence is high, select and return a **single golden truth answer**.
 
 3. **Source‑of‑Truth UI**  
    Provide a clean **Ask Thoth** interface that:  
-   - Shows the **golden answer** prominently.  
-   - Explains the consensus score and label.  
-   - Exposes per‑model answers for transparency.
+   - Shows the **golden truth answer** prominently when it exists.  
+   - Explains the truth confidence score and label in simple language.  
+   - Exposes per‑model answers (votes) for transparency.
 
 4. **Basic Question History**  
-   Show the last N questions and their golden answers/consensus scores; persist for signed‑in users.
+   Show recent questions and their golden truth answers / confidence signals, with persistence for signed‑in users.
 
-5. **Strict Deterministic Settings**  
-   Ensure all model calls use strict deterministic decoding (e.g., `temperature=0`, `top_k=1` or provider equivalent) so that re‑asking the same question yields stable results.
+5. **Clear Positioning Around Trust**  
+   Frame Thoth as a **practical golden truth signal** based on model agreement — not as an infallible oracle.
 
 ### 3.2 Stretch Goals (Post‑MVP)
 
-1. **Public Leaderboard** of questions with highest and lowest consensus.
-2. **Question Type Classification** (Fact / Opinion / Prediction / Value).
-3. **Human Voting** to compare model consensus vs human consensus.
-4. **Export / Research Mode** (CSV / JSON downloads).
-5. **SDKs** (TypeScript, Python) for easy Thoth API integration.
+1. **Public Leaderboard** of questions with the **highest** and **lowest** truth confidence scores.
+2. **Question Type Classification** (e.g., Fact / Opinion / Prediction / Value) to help users interpret why consensus is high or low.
+3. **Human Voting** to compare golden truth answers vs human consensus.
+4. **Export / Research Mode** for downloading questions, answers, and consensus data for offline analysis.
+5. **SDKs** (e.g., TypeScript, Python) for easy Thoth API integration in agents and tools.
 
 ### 3.3 Non‑Goals
 
-- Being a **philosophical truth oracle** or solving epistemology.  
-- Full‑blown **safety / alignment infrastructure**.  
-- Large‑scale production traffic, multi‑region reliability, or enterprise SLOs in MVP.  
-- Implementing complex analytics pipelines beyond simple logging and exports.
+- Being a **philosophical or metaphysical truth oracle** or solving deep epistemology.  
+- Providing a full‑blown **safety / alignment** system.  
+- Serving large‑scale enterprise traffic, multi‑region reliability, or strict SLOs in the MVP.  
+- Implementing complex analytics pipelines beyond simple logging, exports, and basic dashboards.
 
-Thoth is a **practical source‑of‑truth signal**, not an absolute arbiter of reality.
+Thoth is a **practical golden‑truth signal derived from current models**, not an absolute arbiter of reality.
 
 ---
 
@@ -118,304 +101,256 @@ Thoth is a **practical source‑of‑truth signal**, not an absolute arbiter of 
 ### 4.1 Primary Personas
 
 1. **Agent / Infra Engineer (Alex)**  
-   - Builds agents that act on LLM outputs.  
-   - Wants a **cheap truth‑prior check** before high‑impact actions.  
-   - Integrates Thoth’s API to gate actions on strong consensus.
+   - Builds agents or workflows that act on AI outputs.  
+   - Wants a **cheap, fast golden truth check** before triggering high‑impact actions (e.g., sending emails, executing trades, updating records).  
+   - Integrates Thoth as a gate: only proceed automatically when there is a **high‑confidence golden truth answer**.
 
 2. **AI Researcher / Evaluator (Riley)**  
    - Studies hallucinations, robustness, and cross‑model behavior.  
-   - Uses Thoth to find prompts with high vs low consensus.  
-   - Exports Thoth data for offline analysis.
+   - Uses Thoth to find questions where models strongly **converge** vs clearly **disagree**.  
+   - Analyzes patterns in golden truth answers vs disagreement regions, and exports data for deeper study.
 
 3. **Educator / Explainer (Sam)**  
-   - Teaches people how LLMs work.  
-   - Uses Thoth live in classrooms or talks.  
-   - Needs a clear golden answer view + consensus explanation.
-
-### 9. Technical Notes (Non‑binding)
-
-Implementation is intentionally left open. A future engineer (or AI coding agent) is expected to choose the concrete stack, hosting, and integration patterns that best fit the environment, as long as the product behaviors and features in this PRD are preserved.
-
-Non‑functional preferences (e.g., likely use of Next.js, Firebase, Vertex AI, Tailwind) may be documented separately, but are not part of the strict product requirements.
+   - Teaches people how AI models work and how to reason about trust.  
+   - Uses Thoth live in classrooms, talks, or content to show when models **agree on a truth** and when they do not.  
+   - Needs a clear golden truth answer view, confidence explanation, and per‑model answers to illustrate the concept.
 
 ---
-## 6. User Journey & Flows
 
-### 6.1 High‑Level Journey (MVP)
+## 5. User Journey & Flows
+
+### 5.1 High‑Level Journey (MVP)
 
 1. **Landing**  
-   User opens Thoth’s site and sees:
-   - Tagline (source‑of‑truth positioning).  
-   - Single prominent input: **"Ask Thoth"**.
+   The user opens Thoth and sees:  
+   - A concise tagline that frames Thoth as a **golden truth answer oracle built from multiple models**.  
+   - A single prominent input: **"Ask Thoth"**.
 
 2. **Question Entry**  
-   User types a short question (e.g., "Who wrote 1984?") and submits.
+   The user types a short question (e.g., "Who wrote *1984*?" or "What is the recommended daily protein intake?") and submits.
 
 3. **Processing State**  
-   UI shows loading; optionally shows which models are being queried.
+   The interface shows that Thoth is **collecting answers from multiple models**, reinforcing that more than one model is being consulted.
 
 4. **Result Display**  
-   - Thoth shows a **golden answer** (if consensus is strong) in a highlighted box.  
-   - Shows consensus score and label.  
-   - Shows each model’s answer below for transparency.
+   Thoth shows:  
+   - A **golden truth answer** in a highlighted box when confidence is high, or an explicit statement that **no golden truth answer** is available when models disagree.  
+   - A **truth confidence score** and label (e.g., Strong agreement / Partial agreement / Disagreement).  
+   - A short explanation of what that label means for trust.  
+   - Individual **per‑model answer cards** so users can see how each model responded.
 
 5. **Interpretation & Iteration**  
-   User reads the explanation text about the label, maybe asks a follow‑up question, or changes topic.
+   The user reads the golden truth answer and explanation, then may:  
+   - Ask a follow‑up question.  
+   - Explore another topic.  
+   - Drill into disagreement cases to understand why no golden truth answer was produced.
 
 6. **History**  
-   Recent questions + golden answers appear in a history panel, with persistence for signed‑in users.
+   Recent questions and results appear in a **history panel**, with richer, persistent history for signed‑in users.  
+   Users can click a past question to reopen its golden truth answer, confidence score, and per‑model answers.
 
 ---
 
-## 7. Core Features & Requirements
+## 6. Core Features & Product Requirements
 
-### 7.1 Feature: Multi‑Model Deterministic Answering
+### 6.1 Feature: Multi‑Model Truth Gathering
 
-**Description**: For each user question, Thoth queries multiple LLMs under strict deterministic settings and returns their answers. Implementation details (providers, infra, specific models) are left open for future engineering.
+**Description**: For each user question, Thoth gathers answers from multiple strong AI models and treats each answer as that model's **truth vote**.
 
-### 7.2 Feature: Consensus Scoring & Labels
+**Requirements (Product‑Level)**:
 
-**Description**: Convert multiple answers into a consensus score and an interpretable label that reflects how tightly clustered the model answers are.
+- For every question, Thoth collects a **set of independent answers** from multiple models.  
+- The UI makes it clear that each answer comes from a **distinct model** (with model names or labels shown).  
+- The system surfaces both **where answers align** and **where they differ**.
+
+### 6.2 Feature: Truth Confidence Scoring & Labels
+
+**Description**: Convert multiple model answers into a **truth confidence score** and a label that reflects how tightly the models agree.
 
 **Requirements (Conceptual)**:
 
-- Thoth computes a **consensus score** for a set of answers.
-- That score is mapped into three sigma-inspired bands:
-   - **Strong consensus**: score is more than **3σ** above the disagreement baseline.
-   - **Partial consensus**: score is between **2σ** and **3σ**.
-   - **Disagreement**: score is below **2σ**.
-- The UI and any integrations always receive both the numeric score and the label.
+- Thoth computes a single **truth confidence score** based on how similar the model answers are.  
+- That score is mapped into at least three bands, for example:  
+  - **Strong agreement**: the models give nearly identical answers.  
+  - **Partial agreement**: the models overlap but differ in details or framing.  
+  - **Disagreement**: the models give meaningfully different answers.
+- The UI and any integrations always receive both the **numeric score** and the **label**.
 
-### 7.3 Feature: Golden Answer Selection
+### 6.3 Feature: Golden Truth Answer Selection
 
-**Description**: When consensus is high, choose a single golden answer that Thoth surfaces as the primary output.
+**Description**: When models strongly agree, Thoth selects a **single golden truth answer** to surface as the primary output.
 
-**Requirements**:
+**Requirements (Product‑Level)**:
 
-- If `consensusLabel = strong_consensus`:
-  - Choose golden answer by heuristic (e.g., pick answer that minimizes total embedding distance to others or is shortest while preserving meaning).  
-  - Optionally, use an LLM summarizer (one of the same models) to unify near‑identical answers into a clean canonical phrasing.  
-- If `consensusLabel = partial_consensus`:
-  - Optionally produce a synthesized golden answer with a clear note that consensus is partial.  
-  - Always show per‑model answers beneath.
-- If `consensusLabel = disagreement`:
-  - Do **not** pick a golden answer.  
-  - Set `goldenAnswer = null` and explain that Thoth is unsure; show divergent answers instead.
+- When the truth confidence label indicates **strong agreement**:  
+  - Thoth surfaces a **single golden truth answer** as the main result.  
+  - The golden truth answer is accompanied by an explicit statement that it is based on **agreement across multiple strong models**.  
+- When the label indicates **partial agreement**:  
+  - Thoth may still offer a synthesized golden truth answer, but it must clearly state that confidence is **limited** and that models differ in some details.  
+  - Per‑model answers are always visible so users can inspect differences.  
+- When the label indicates **disagreement**:  
+  - Thoth does **not** present a golden truth answer.  
+  - The primary message explains that **models disagree**, and users should not treat any single answer as definitive.  
+  - All per‑model answers are shown as separate views of the question.
 
-### 7.4 Feature: Question History (Guest + Auth)
+### 6.4 Feature: Question History (Guest + Auth)
 
-**Description**: Show recent Thoth queries and, for signed‑in users, persist them.
+**Description**: Show recent queries and their truth outcomes, and persist them for signed‑in users.
 
-**Requirements**:
+**Requirements (Product‑Level)**:
 
-- **Guest mode**: keep a small in‑memory / `localStorage` list of recent questions and results.  
-- **Auth mode** (Firebase Auth, Google sign‑in):
-  - Store each query in Firestore:  
-    - `userId`, `question`, `goldenAnswer`, `consensusScore`, `consensusLabel`, list of model answers, timestamps.  
-  - Fetch last N queries for display.  
-- UI: simple list or table under the main panel, clickable to re‑open a prior result.
+- **Guest mode**:  
+  - Maintain a **short, session‑based history** of recent questions and results.  
+  - Allow quick re‑opening of a previous question to review its golden truth answer and confidence.
+- **Signed‑in users**:  
+  - See an extended **personal history** of past questions and results.  
+  - Can browse, search, or filter their history (e.g., by high vs low confidence).  
+- History entries show at least: **question**, **whether a golden truth answer was produced**, the **confidence label**, and a timestamp.
 
-### 7.5 Feature: Clear Explanation UI
+### 6.5 Feature: Clear Explanation & Trust UI
 
-**Description**: Present Thoth’s results in a way that non‑experts can understand.
+**Description**: Present Thoth's outputs in a way that makes trust decisions easy for non‑experts.
 
-**Requirements**:
+**Requirements (Product‑Level)**:
 
-- Highlighted **golden answer box** at the top of the results (or an explicit message when there is no golden answer).
-- Consensus meter (e.g., bar or radial) with numerical score.
-- Short explanation under the meter based on label, for example:
-  - Strong consensus → "Several strong models gave nearly identical answers."  
-  - Partial consensus → "Models overlap but differ in details; use with caution."  
-  - Disagreement → "Models gave noticeably different answers; there is no single stable answer here."
-- Per‑model answer cards with model name, provider, and response.
+- A highlighted **golden truth answer box** at the top of the results when available, or an explicit **"no golden truth answer"** message when not.  
+- A **truth confidence meter** or visual indicator with a numeric score.  
+- Short, label‑specific explanations under the meter, for example:  
+   - **Strong agreement** — "Several strong models gave essentially the same answer. This is a high‑confidence golden truth answer."  
+   - **Partial agreement** — "Models overlap but differ in details. Treat this as a plausible answer and use judgment."  
+   - **Disagreement** — "Models gave noticeably different answers. Thoth cannot surface a single truth here."  
+- **Per‑model answer cards** that show each models answer, name/label, and any relevant meta‑info (e.g., whether an answer was skipped or unavailable).
 
-### 7.6 Feature: Error Handling & Timeouts
+### 6.6 Feature: Robust User Experience on Failures
 
-**Description**: Keep the experience robust even when some providers fail.
+**Description**: Keep the experience understandable when some models or requests fail.
 
-**Requirements**:
+**Requirements (Product‑Level)**:
 
-- Per‑model timeout (e.g., 8–10 seconds) to prevent hanging queries.
-- If some models fail:
-  - Mark those models as errored in the response and UI.  
-  - Compute consensus using only successful models (with a clear note that fewer models participated).  
-- If all models fail:
-  - Return a structured error and show a user‑friendly message with retry guidance.
-
----
-
-## 8. Non‑Functional Requirements
-
-### 8.1 Performance
-
-- Target end‑to‑end latency **< 3 seconds** for typical questions with 3 models, assuming light models and regional Vertex deployment.  
-- All model calls executed in parallel; no sequential fan‑out.
-
-### 8.2 Reliability
-
-- Handle partial provider outages gracefully (see §7.6).  
-- Log failures and latencies for debugging and tuning.
-
-### 8.3 Security & Privacy
-
-- Use **Application Default Credentials (ADC)** for Vertex AI; no provider API keys in the client.  
-- Store only minimal necessary user data in Firestore.  
-- Do not expose questions or answers publicly without explicit design (MVP is per‑user only).
-
-### 8.4 Scalability (MVP)
-
-- Designed for **hackathon / early‑prototype** scale (hundreds of queries per day).  
-- No complex autoscaling required; Firebase Hosting + simple backend is sufficient in the short term.
-
-### 8.5 UX & Accessibility
-
-- Mobile‑friendly layout; core interactions work on small screens.  
-- Typography and spacing optimized for live demos on projectors.  
-- Clear focus states and basic accessibility best practices.
+- If some models fail to answer a question:  
+  - Thoth clearly marks those models as **unavailable** for that query.  
+  - It computes truth confidence using only the **successful** answers, and notes that **fewer models participated**.  
+- If all models fail:  
+  - Thoth shows a **clear error state** explaining that no answer could be generated.  
+  - It suggests simple next steps (e.g., "Try again" or "Change your question").
 
 ---
 
-## 9. Technical Architecture
+## 7. Non‑Functional Product Expectations
 
-### 9.1 Stack Overview
+> Note: These are experience‑level expectations rather than technical implementation details.
 
-- **Framework**: Next.js (App Router)
-- **Backend & Hosting**: Firebase (Hosting + optional Functions if needed)
-- **Auth**: Firebase Auth (Google sign‑in)
-- **Database**: Firestore (question & history logging)
-- **LLM & Embeddings**: Vertex AI (Gemini, Claude, Llama, embeddings)
-- **Styling**: Tailwind CSS
+### 7.1 Performance (Perceived)
 
-### 9.2 Key Components
+- Users should feel that Thoth responds **quickly enough** for interactive use.  
+- The interface should communicate clearly when it is **waiting on model answers** vs when something has gone wrong.
 
-- `app/page.tsx` — main **Ask Thoth** page (question input, results, history).  
-- `app/api/thoth/route.ts` — server route that:  
-  - Validates the question.  
-  - Calls Vertex AI for multiple models in parallel with deterministic decoding.  
-  - Computes consensus score + label and selects golden answer.  
-  - Persists results for signed‑in users.  
-  - Returns structured JSON to the frontend.
+### 7.2 Reliability (Perceived)
 
-### 9.3 Example API Response
+- Thoth should handle **partial model failures** gracefully without confusing users.  
+- The system should avoid leaving users in ambiguous loading states.
 
-```json
-{
-  "question": "Who wrote 1984?",
-  "goldenAnswer": "1984 was written by George Orwell.",
-  "consensusScore": 0.98,
-  "consensusLabel": "strong_consensus",
-  "models": [
-    {
-      "name": "gemini-3.0-flash-lite",
-      "provider": "google",
-      "answer": "1984 was written by George Orwell.",
-      "latencyMs": 530,
-      "error": null
-    },
-    {
-      "name": "claude-4-haiku",
-      "provider": "anthropic",
-      "answer": "The novel '1984' was written by George Orwell.",
-      "latencyMs": 610,
-      "error": null
-    },
-    {
-      "name": "llama-4",
-      "provider": "meta",
-      "answer": "1984 was written by George Orwell.",
-      "latencyMs": 700,
-      "error": null
-    }
-  ],
-  "createdAt": "2025-11-24T12:00:00Z"
-}
-```
+### 7.3 Security & Privacy (User‑Facing)
+
+- Users should understand that their questions and answers are **not automatically public**.  
+- Any public exposure of questions (e.g., leaderboards, feeds) must be **explicitly opt‑in**.
+
+### 7.4 Scalability (MVP)
+
+- The MVP is intended for **early‑stage usage** (hackathons, prototypes, small teams) rather than heavy enterprise loads.  
+- The product copy should set expectations accordingly.
+
+### 7.5 UX & Accessibility
+
+- The interface should be **readable and usable on mobile** as well as desktop.  
+- The layout and typography should be suitable for **live demos or presentations**.  
+- Basic accessibility practices should be followed (e.g., clear focus states, sufficient contrast, understandable labels).
 
 ---
 
-## 10. Metrics & Success Criteria
+## 8. Metrics & Success Criteria
 
-### 10.1 Hackathon Success
+### 8.1 Hackathon / MVP Success
 
-- ✅ Live demo reliably shows Thoth returning golden answers and consensus scores for curated examples.  
-- ✅ Clear differentiation between strong consensus (e.g., chicken joke, basic facts) and disagreement (e.g., "When will AGI arrive?").  
-- ✅ Judges and users can explain Thoth back in one sentence.
+For an initial release or hackathon demo, Thoth is successful if:
 
-### 10.2 Early Product Metrics
+- The live demo reliably shows Thoth returning **golden truth answers with clear confidence signals** for curated examples.  
+- Observers can see clear differences between:  
+  - High‑confidence truth questions (e.g., simple facts, well‑agreed recommendations).  
+  - Low‑confidence or disagreement questions (e.g., controversial topics, speculative predictions).  
+- Judges and users can explain Thoth in **one sentence**, such as:  
+   > "It's a place where multiple AI models vote on an answer, and when they strongly agree, you get a golden truth answer you can trust."
 
-If continued beyond hackathon:
+### 8.2 Early Product Metrics
 
-- Number of unique users / agents calling Thoth.  
-- Questions per session.  
-- Distribution of consensus scores across questions.  
-- Most frequently revisited questions.
+If extended beyond MVP, Thoth can track:
+
+- Number of unique users / agents asking Thoth questions.  
+- Questions per session or per integration.  
+- Distribution of **truth confidence scores** across questions.  
+- Percentage of queries that result in a **golden truth answer** vs **no truth** (disagreement).  
+- Most frequently revisited or bookmarked questions.
 
 ---
 
-## 11. Risks & Open Questions
+## 9. Risks & Open Questions
 
-### 11.1 Risks
+### 9.1 Risks
 
-1. **API Cost & Rate Limits**  
-   - Multiple model calls per query can be expensive.  
-   - Mitigation: use light models (Flash Lite, Haiku), add caching and rate limits, and potentially gate heavy usage behind auth.
+1. **Over‑trust in Golden Truth Answers**  
+   - Users may treat high‑confidence golden truth answers as **absolute facts**, even when underlying models share similar blind spots.  
+   - Mitigation: Consistently frame Thoth as a **practical truth signal**, add copy reminding users that all answers come from current models with limitations.
 
-2. **Over‑trust in Consensus**  
-   - Users may equate high consensus with absolute truth.  
-   - Mitigation: consistently frame Thoth as a **source‑of‑truth signal**, include clear caveats in UI copy.
+2. **Cost & Access to Strong Models**  
+   - Reliance on multiple strong models may be **expensive or rate‑limited**.  
+   - Mitigation: Set expectations about usage limits; consider staged rollouts and clear messaging for heavy users.
 
-3. **Latency Variability**  
-   - External providers may spike in latency.  
-   - Mitigation: parallel calls, light models, timeouts, and good loading states.
+3. **Latency & User Frustration**  
+   - Aggregating multiple answers may be slower than single‑model tools.  
+   - Mitigation: Invest in good loading states, partial results explanations, and set expectations about tradeoffs between **speed and trust**.
 
-4. **Model Drift**  
-   - Vendors may update models and change priors.  
-   - Mitigation: include model version info, accept that Thoth reflects the **current** best available oracle.
+4. **Model Drift & Changing Truths**  
+   - As models evolve, their behavior and apparent consensus can **change over time**.  
+   - Mitigation: Clearly position Thoth as reflecting **today's best available consensus**, not eternal truth; consider exposing that behavior may evolve.
 
-### 11.2 Open Questions
+### 9.2 Open Questions
 
-1. **How many models are enough?**  
-   - Is 3 sufficient for a useful signal, or do we want more over time?
+1. **How many models are enough for a useful truth signal?**  
+   - Is a small, diverse set sufficient, or do we need many models for higher confidence?
 
-2. **How to choose golden answer selection heuristic?**  
-   - Heuristic vs LLM‑based summarization vs user choice.
+2. **How should golden truth answers be presented for nuanced or probabilistic topics?**  
+   - For example, predictions or value questions where there may never be a single simple answer.
 
-3. **Do we expose other users’ questions?**  
-   - Public feed vs per‑user private history vs opt‑in sharing.
+3. **Should users see other peoples questions and truths?**  
+   - Options include: private by default, public leaderboard, opt‑in sharing, or community curation.
 
 4. **Long‑term positioning**  
-   - Remain focused on source‑of‑truth, or expand into broader eval / monitoring tooling?
+   - Should Thoth remain narrowly focused on **golden truth answers**, or expand into broader evaluation, monitoring, or governance tooling around AI outputs?
 
 ---
 
-## 12. MVP Cut (Strict)
+## 10. MVP Cut (Strict)
 
-To ship Thoth during a short hackathon, the strict MVP includes:
+To ship Thoth in a short timeframe, the strict MVP includes:
 
 1. **Single Ask Thoth Page**  
    - Question input.  
-   - Golden answer box.  
-   - Consensus meter + label.  
-   - Per‑model answers.  
-   - Recent queries list (session + basic Firestore logging if user is signed in).
+   - Golden truth answer box (or explicit "no golden truth answer" state).  
+   - Truth confidence meter + label.  
+   - Per‑model answer cards.  
+   - Recent queries list (session‑based, with simple persistence for signed‑in users).
 
-2. **Backend Endpoint `/api/thoth`**  
-   - Calls 3 frontier models via Vertex AI with deterministic decoding in parallel.  
-   - Computes consensus score, label, and golden answer (or none for disagreement).  
-   - Returns structured JSON.
+2. **Basic Multi‑Model Truth Gathering Flow**  
+   - For each question, collect answers from multiple models.  
+   - Compute a truth confidence score and label based on agreement.  
+   - Decide whether to surface a golden truth answer or a disagreement view.
 
-3. **Firebase Integration**  
-   - Google sign‑in (optional but wired).  
-   - Firestore schema for saving queries, golden answers, and consensus scores.
+3. **History & Copy for Trust**  
+   - Minimal personal history so users can revisit prior questions.  
+   - Clear, concise copy that explains what golden truth answers mean and what their limits are.
 
-4. **Basic Error Handling & Copy**  
-   - Clear messages on provider failures and low‑consensus cases.  
-   - Simple, dark‑mode UI with Tailwind, suitable for live demos.
+4. **Simple, Demo‑Ready UI**  
+   - Clean layout suitable for **live demos**, with dark‑mode or high‑contrast styling.  
+   - Focus on clarity of the golden truth answer, trust signal, and disagreement cases.
 
-Everything else (leaderboards, tagging, exports, SDKs) is explicitly **out of scope for strict MVP**, but believable as follow‑up work.
-
----
-
-## 13. Narrative for Hackathon Pitch
-
-> "We built **Thoth**, a cross‑model source of truth. Instead of asking one LLM and hoping it’s right, you ask Thoth once. Under the hood, we query multiple frontier models — Gemini, Claude, Llama — with fully deterministic decoding so each gives its highest‑confidence answer. We compare their outputs, compute a consensus score, and when they strongly agree, we surface a single golden answer you can trust as today’s best truth‑candidate. When they disagree, Thoth doesn’t fake it; it shows you the disagreement instead. It’s not a philosophical oracle—but it’s the closest thing we have to a practical, API‑driven source of truth built from the models everyone already relies on."
+Everything else (leaderboards, rich exports, sophisticated filters, SDKs) is explicitly **out of scope for the strict MVP**, but plausible as follow‑up work.

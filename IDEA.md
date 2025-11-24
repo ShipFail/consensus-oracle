@@ -79,7 +79,7 @@ Thoth’s promise:
 
 ### 2.1. One‑Line Idea
 
-> **Thoth asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a single golden answer plus a consensus score so humans and agents can treat it as a source‑of‑truth signal.**
+> **Thoth asks multiple frontier LLMs the same question with deterministic decoding, treats each model's highest‑confidence answer as its vote, and when they agree, returns a single golden truth answer plus a truth‑confidence score so humans and agents can treat it as a golden truth signal.**
 
 ### 2.2. What Thoth Is
 
@@ -101,7 +101,7 @@ Thoth is **not**:
 But given how humans already behave today—trusting a single LLM as truth—Thoth is a **strict upgrade**:
 
 - One trusted LLM → **many top models in agreement**.
-- One unverified answer → **golden answer + consensus score**.
+- One unverified answer → **golden truth answer + truth‑confidence score**.
 
 ---
 
@@ -127,13 +127,13 @@ Thoth is that place.
 
 1. **Input**: Short question from a human or agent.
 2. **Model Fan‑Out**: Thoth queries multiple frontier models (e.g., Gemini 3.0 Flash Lite, Claude 4 Haiku, Llama 4) via Vertex AI with deterministic decoding.
-3. **Agreement Engine**: Thoth compares the answers using exact match + embeddings, computes a consensus score.
-4. **Golden Answer Selection**:
-   - If consensus is high, Thoth selects a single representative answer and treats it as the **golden answer**.
+3. **Agreement Engine**: Thoth compares the answers using exact match + embeddings and computes a truth‑confidence score.
+4. **Golden Truth Answer Selection**:
+  - If agreement is high, Thoth selects a single representative answer and treats it as the **golden truth answer**.
    - If consensus is low, Thoth may return multiple divergent answers and a warning.
 5. **Output**: JSON payload + UI view containing:
-   - Golden answer
-   - Consensus score `[0, 1]`
+  - Golden truth answer
+  - Truth‑confidence score `[0, 1]`
    - Label: **Strong consensus / Partial consensus / Disagreement**
    - Per‑model answers for transparency
 
@@ -176,7 +176,7 @@ We use the **latest and lightest** production‑ready models available via Verte
 
 All calls are executed **in parallel** (e.g. `Promise.all`) so that Thoth feels as fast as a single model call.
 
-### 4.3. Consensus & Golden Answer Computation
+### 4.3. Truth‑Confidence & Golden Truth Answer Computation
 
 1. **Normalization**
    - Lowercase, strip punctuation, normalize whitespace.
@@ -192,12 +192,12 @@ All calls are executed **in parallel** (e.g. `Promise.all`) so that Thoth feels 
 4. **Label Mapping**
    - `≥ 0.90` → **Strong consensus** (golden truth candidate)
    - `0.70–0.89` → **Partial consensus** (usable with caution)
-   - `< 0.70` → **Disagreement** (no single golden answer)
+  - `< 0.70` → **Disagreement** (no single golden truth answer)
 
-5. **Golden Answer Selection**
-   - When consensus is strong, pick the **shortest, cleanest** answer as the golden answer (e.g., via simple heuristics or an LLM‑based selector).
-   - When consensus is partial, optionally let an LLM summarize the cluster into a **single synthesized golden answer** while exposing raw answers.
-   - When disagreement dominates, **do not pick a golden answer**; instead, surface the disagreement and encourage human judgment.
+5. **Golden Truth Answer Selection**
+  - When agreement is strong, pick the **shortest, cleanest** answer as the golden truth answer (e.g., via simple heuristics or an LLM‑based selector).
+  - When agreement is partial, optionally let an LLM summarize the cluster into a **single synthesized golden truth answer** while exposing raw answers.
+  - When disagreement dominates, **do not pick a golden truth answer**; instead, surface the disagreement and encourage human judgment.
 
 This keeps Thoth honest: it only speaks with authority when the models actually agree.
 
@@ -258,9 +258,9 @@ Agents can then:
 The Thoth web UI will:
 
 - Let users type a **short question**.
-- Show **Thoth’s golden answer** at the top.
+- Show **Thoth’s golden truth answer** at the top.
 - Display:
-  - Consensus score + label.
+  - Truth‑confidence score + label.
   - Per‑model answers for transparency.
 - Highlight when:
   - "Thoth speaks" (strong consensus).
@@ -270,14 +270,14 @@ This reinforces the idea that Thoth is an **oracle that only speaks confidently 
 
 ### 5.2. Demo Flow
 
-1. Ask: `Tell me a joke` → all models converge → Thoth returns the classic chicken joke as the **golden answer** with very high consensus.
-2. Ask: `What is the capital of France?` → perfect agreement → golden answer with near‑perfect consensus.
-3. Ask: `When will AGI arrive?` → answers diverge → Thoth refuses to pick a golden answer, instead shows disagreement and warns that there is no stable truth here.
+1. Ask: `Tell me a joke` → all models converge → Thoth returns the classic chicken joke as the **golden truth answer** with very high truth‑confidence.
+2. Ask: `What is the capital of France?` → perfect agreement → golden truth answer with near‑perfect truth‑confidence.
+3. Ask: `When will AGI arrive?` → answers diverge → Thoth refuses to pick a golden truth answer, instead shows disagreement and warns that there is no stable truth here.
 
 In under a minute, people see:
 
 - Thoth as a living **source‑of‑truth API**.
-- How "golden answers" emerge from deterministic cross‑model agreement.
+- How "golden truth answers" emerge from deterministic cross‑model agreement.
 - When Thoth is willing to speak—and when it steps back.
 
 ---
@@ -302,7 +302,7 @@ Thoth makes this behavior safer and more transparent by:
 
 - Forcing deterministic decoding (highest‑confidence answers).
 - Requiring agreement across **multiple top models**.
-- Exposing a numeric consensus score and raw answers.
+- Exposing a numeric truth‑confidence score and raw answers.
 
 ### 6.2. Consensus vs Truth
 
@@ -335,7 +335,7 @@ The guiding mental model:
   - Llama 4
 - Deterministic decoding + parallel fan‑out.
 - Basic consensus scoring (exact match + embeddings).
-- Golden answer selection with score + label.
+- Golden truth answer selection with truth‑confidence score + label.
 
 **Stretch**
 
@@ -358,6 +358,6 @@ The guiding mental model:
 
 - Asks multiple frontier LLMs the same question with deterministic decoding.
 - Measures how strongly they agree.
-- Returns a **golden answer and a consensus score**.
+- Returns a **golden truth answer and a truth‑confidence score**.
 
 Many models in. One written answer out. Thoth as the closest thing we have to an oracle today.
