@@ -1,6 +1,6 @@
 # Project PRD: Thoth — Cross‑Model Source of Truth
 
-> A web app and API that asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a **single golden answer plus a consensus score** so humans and agents can treat it as a practical source‑of‑truth signal.
+> A web app that asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a **single golden answer plus a consensus score** so humans and agents can treat it as a practical source‑of‑truth signal.
 
 ---
 
@@ -68,7 +68,7 @@ This serves as:
 
 > **Vision**: Give humans and agents a single place to ask for the **best available answer** today, grounded in cross‑model deterministic agreement.
 
-> **Product Statement**: **Thoth** is a web app and API that asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a **golden answer plus a consensus score**. When the best models all say the same thing, Thoth surfaces that as a strong source‑of‑truth signal; when they diverge, Thoth exposes the disagreement instead of pretending there is one answer.
+> **Product Statement**: **Thoth** is a web app that asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a **golden answer plus a consensus score**. When the best models all say the same thing, Thoth surfaces that as a strong source‑of‑truth signal; when they diverge, Thoth exposes the disagreement instead of pretending there is one answer.
 
 ---
 
@@ -77,7 +77,7 @@ This serves as:
 ### 3.1 Goals (MVP)
 
 1. **Cross‑Model Deterministic Answering**  
-   For any short question, show deterministic answers from at least **3** frontier LLMs (Gemini 3.0 Flash Lite, Claude 4 Haiku, Llama 4) via Vertex AI.
+   For any short question, show deterministic answers from multiple strong LLMs, all run with strict deterministic decoding.
 
 2. **Consensus Measurement & Golden Answer**  
    Compute and display a **consensus score** (0–1 / 0–100%) and label, and when consensus is strong, select and return a **single golden answer**.
@@ -88,14 +88,11 @@ This serves as:
    - Explains the consensus score and label.  
    - Exposes per‑model answers for transparency.
 
-4. **Basic Question History (with Auth)**  
-   Show the last N questions and their golden answers/consensus scores; persist for signed‑in users (Firebase Auth + Firestore).
+4. **Basic Question History**  
+   Show the last N questions and their golden answers/consensus scores; persist for signed‑in users.
 
 5. **Strict Deterministic Settings**  
-   Ensure all model calls use strict deterministic decoding (e.g., `temperature=0`, `top_k=1` or provider equivalent).
-
-6. **Agent‑Friendly API**  
-   Offer an MVP `POST /api/thoth` endpoint that returns golden answer, consensus score, label, and per‑model answers in JSON.
+   Ensure all model calls use strict deterministic decoding (e.g., `temperature=0`, `top_k=1` or provider equivalent) so that re‑asking the same question yields stable results.
 
 ### 3.2 Stretch Goals (Post‑MVP)
 
@@ -135,63 +132,13 @@ Thoth is a **practical source‑of‑truth signal**, not an absolute arbiter of 
    - Uses Thoth live in classrooms or talks.  
    - Needs a clear golden answer view + consensus explanation.
 
-### 4.2 Secondary Personas
+### 9. Technical Notes (Non‑binding)
 
-4. **Curious Power User (Jamie)**  
-   - Already uses multiple LLMs.  
-   - Wants a single place to check, "What do they all say?"  
-   - Cares about stable, trustworthy answers.
+Implementation is intentionally left open. A future engineer (or AI coding agent) is expected to choose the concrete stack, hosting, and integration patterns that best fit the environment, as long as the product behaviors and features in this PRD are preserved.
 
-5. **Hackathon Judge / Investor (Taylor)**  
-   - Evaluates whether this can evolve into a product / infra primitive.  
-   - Wants a crisp story, live demo, and clear differentiation.
+Non‑functional preferences (e.g., likely use of Next.js, Firebase, Vertex AI, Tailwind) may be documented separately, but are not part of the strict product requirements.
 
 ---
-
-## 5. User Stories
-
-### 5.1 MVP User Stories
-
-1. **Ask & See Golden Answer**  
-   As a *user*, I want to type a short question and see a **single golden answer** plus supporting model answers, so I can quickly know what to trust.
-
-2. **See Consensus Score & Label**  
-   As an *engineer/researcher*, I want a numerical consensus score and a clear label (Strong / Partial / Disagreement), so I can decide whether to act automatically, escalate, or ignore.
-
-3. **Inspect Per‑Model Answers**  
-   As a *developer*, I want to see each model’s answer labeled by model name (e.g., `gemini-3.0-flash-lite`, `claude-4-haiku`, `llama-4`), so I can understand how the golden answer emerged.
-
-4. **Agent‑Callable API**  
-   As an *agent builder*, I want to call a simple HTTP API with a question and receive golden answer, consensus score, label, and model answers, so I can wire Thoth into my agent’s decision loop.
-
-5. **Understand When Thoth Is Uncertain**  
-   As a *non‑technical user*, I want Thoth to clearly say when there is **no golden answer** (low consensus) and show the disagreement instead of forcing a fake unified answer.
-
-6. **See History**  
-   As a *signed‑in user*, I want to see my recent Thoth queries and golden answers, so I can revisit or share them later.
-
-7. **Deterministic Behavior**  
-   As a *researcher*, I want Thoth to use deterministic decoding so that re‑asking the same question yields stable results unless the underlying models change.
-
-8. **Graceful Errors**  
-   As a *user*, I want clear, non‑technical error messages if a provider fails or times out, so I know whether to retry or adjust my question.
-
-### 5.2 Stretch User Stories
-
-9. **Leaderboard of Stable/Unstable Questions**  
-   As a *researcher*, I want to see which questions have the highest consensus and which have the lowest, so I can explore boundaries of model agreement.
-
-10. **Question Type Awareness**  
-   As a *user*, I want to know if my question is factual, predictive, or opinionated, so I can interpret the consensus score correctly.
-
-11. **Compare Human vs Model Consensus**  
-   As a *researcher*, I want to collect human votes on the best answer and compare them with Thoth’s golden answer and consensus score.
-
-12. **Bulk / Export Mode**  
-   As a *researcher*, I want to export questions, answers, and consensus scores (CSV/JSON) for offline study.
-
----
-
 ## 6. User Journey & Flows
 
 ### 6.1 High‑Level Journey (MVP)
@@ -218,74 +165,26 @@ Thoth is a **practical source‑of‑truth signal**, not an absolute arbiter of 
 6. **History**  
    Recent questions + golden answers appear in a history panel, with persistence for signed‑in users.
 
-### 6.2 Detailed Flow: `/api/thoth`
-
-1. **Input Validation**  
-   - Enforce length limits (e.g., 5–256 characters).  
-   - Basic safety/profanity filter for MVP.
-
-2. **Backend Fan‑Out**  
-   - Backend receives `{ question }`.  
-   - In parallel, calls multiple models via Vertex AI (Gemini, Claude, Llama) with deterministic decoding.  
-   - Enforces per‑model timeout.
-
-3. **Consensus Computation**  
-   - Normalize each answer (lowercase, strip punctuation, normalize whitespace).  
-   - If all normalized answers identical → consensus = 1.0 (100%), label = **Strong consensus**, golden answer = that text.  
-   - Otherwise, embed each answer with Vertex AI `text-embedding-004`.  
-   - Compute pairwise cosine similarities and average → base consensus score.  
-   - Map to label thresholds (see §8.2).  
-   - Choose a golden answer when consensus is strong (e.g., via heuristic: shortest clean answer, or LLM summarizer).
-
-4. **Persistence**  
-   - If user is signed in, store question, answers, consensus, and golden answer to Firestore.
-
-5. **Response**  
-   - Return JSON with question, golden answer (if any), consensus score + label, per‑model answers, timing, and error info.
-
-6. **Rendering**  
-   - Frontend renders golden answer + consensus meter and model cards.
-
 ---
 
 ## 7. Core Features & Requirements
 
 ### 7.1 Feature: Multi‑Model Deterministic Answering
 
-**Description**: For each user question, Thoth queries multiple LLMs in parallel under strict deterministic settings and returns their answers.
-
-**Requirements**:
-
-- Use **Vertex AI** as the gateway for all model calls.  
-- Include at least these models in the MVP:  
-  - `gemini-3.0-flash-lite` (Google)  
-  - A Claude 4 Haiku SKU (via Vertex)  
-  - A Llama 4 SKU (via Vertex Model Garden)
-- Ensure deterministic decoding parameters for each call:
-  - `temperature = 0`  
-  - `top_k = 1` or provider‑equivalent greedy.  
-- Execute calls **in parallel** using `Promise.all` or equivalent so total latency is dominated by the slowest single call.
-- Capture per‑model metadata: `name`, `provider`, `latencyMs`, and any error status.
+**Description**: For each user question, Thoth queries multiple LLMs under strict deterministic settings and returns their answers. Implementation details (providers, infra, specific models) are left open for future engineering.
 
 ### 7.2 Feature: Consensus Scoring & Labels
 
-**Description**: Convert multiple answers into a scalar consensus score and an interpretable label.
+**Description**: Convert multiple answers into a consensus score and an interpretable label that reflects how tightly clustered the model answers are.
 
-**Requirements**:
+**Requirements (Conceptual)**:
 
-- Normalization:
-  - Lowercase, remove punctuation, collapse whitespace.
-- Exact‑match fast path:
-  - If all normalized outputs identical → `consensusScore = 1.0`.
-- Otherwise:
-  - Use a single Vertex AI embedding model (e.g., `text-embedding-004`) for all answers.  
-  - Compute pairwise cosine similarities between all embeddings.  
-  - Average the pairwise similarities → `consensusScore ∈ [0, 1]`.
-- Label thresholds:
-  - `score >= 0.9` → **strong_consensus**  
-  - `0.7 <= score < 0.9` → **partial_consensus**  
-  - `score < 0.7` → **disagreement**
-- Include `consensusScore` and `consensusLabel` fields in all API responses.
+- Thoth computes a **consensus score** for a set of answers.
+- That score is mapped into three sigma-inspired bands:
+   - **Strong consensus**: score is more than **3σ** above the disagreement baseline.
+   - **Partial consensus**: score is between **2σ** and **3σ**.
+   - **Disagreement**: score is below **2σ**.
+- The UI and any integrations always receive both the numeric score and the label.
 
 ### 7.3 Feature: Golden Answer Selection
 

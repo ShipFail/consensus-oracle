@@ -86,11 +86,11 @@ Instead of trusting a single model, **Thoth** gives you an instant **cross‑mod
 
 1. A user or agent sends a **short question** to Thoth.
 2. Thoth calls multiple LLMs (e.g. Gemini 3.0 Flash Lite, Claude 4 Haiku, Llama 4) via **Vertex AI** with **deterministic decoding**.
-3. Thoth **compares their answers** using exact match + embeddings.
-4. Thoth computes a **consensus score** in `[0, 1]` and a label:
-   - **Strong consensus** — models strongly agree; safe to treat as golden answer
-   - **Partial consensus** — some agreement, some variation; use with caution
-   - **Disagreement** — models diverge; no single golden answer
+3. Thoth **compares their answers** and computes a **consensus score**.
+4. Thoth maps that score into three bands inspired by statistics:
+   - **Strong consensus** — score is more than **3σ** above disagreement
+   - **Partial consensus** — score is between **2σ** and **3σ**
+   - **Disagreement** — score is below **2σ**
 5. Thoth returns:
    - A **golden answer** when consensus is high
    - Each model’s raw answer for transparency
