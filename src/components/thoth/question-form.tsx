@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 
-const GUEST_CHAR_LIMIT = 17;
+const GUEST_CHAR_LIMIT = 170;
 
 export function QuestionForm() {
   const [question, setQuestion] = useState('');

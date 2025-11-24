@@ -1,29 +1,34 @@
 'use server';
 
-import { ai } from '@/ai/genkit';
+import { ai, deterministicConfig } from '@/ai/genkit';
 import { generateGoldenTruthAnswer } from '@/ai/flows/generate-golden-truth-answer';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
+import { model } from 'genkit/model';
 
-const modelNames = ['Model Alpha', 'Model Beta', 'Model Gamma'];
+const modelReferences = [
+  model('googleai/gemini-2.5-flash'),
+  model('googleai/gemini-pro'),
+];
 
 async function getSingleAnswer(
   question: string,
-  modelName: string
+  modelRef: (typeof modelReferences)[number]
 ): Promise<ModelAnswer> {
   try {
     const { output } = await ai.generate({
-      model: ai.model,
-      prompt: `You are AI Model ${modelName}. In one or two sentences, provide the best possible answer for the following question. Be direct and concise. Question: ${question}`,
+      model: modelRef,
+      prompt: `You are an AI Model. In one or two sentences, provide the best possible answer for the following question. Be direct and concise. Question: ${question}`,
       output: { format: 'text' },
+      config: deterministicConfig,
     });
     return {
-      modelName,
+      modelName: modelRef.name.replace('googleai/',''),
       answer: output || 'No answer could be generated.',
     };
   } catch (error) {
-    console.error(`Error getting answer from ${modelName}:`, error);
+    console.error(`Error getting answer from ${modelRef.name}:`, error);
     return {
-      modelName,
+      modelName: modelRef.name,
       answer: 'Model unavailable for this query.',
     };
   }
@@ -33,7 +38,7 @@ export async function getThothAnswer(
   question: string,
   id: string
 ): Promise<GoldenTruthResult> {
-  const answerPromises = modelNames.map((name) => getSingleAnswer(question, name));
+  const answerPromises = modelReferences.map((ref) => getSingleAnswer(question, ref));
   const modelAnswers = await Promise.all(answerPromises);
 
   const validAnswers = modelAnswers
