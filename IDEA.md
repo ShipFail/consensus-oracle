@@ -1,173 +1,211 @@
 ---
-title: "LLM Consensus Oracle / Truth Estimator"
+title: "Thoth — Cross-Model Source of Truth"
 author: "Huan Li"
 date: 2025-11-21
 tags:
   - deterministic
   - oracle
+  - source-of-truth
 ---
 
-> Working title(s): **Consensus Oracle**, **Many Minds**
-> Stack: **Next.js** (frontend + backend) + **Firebase** (hosting + backend) + **Vertex AI** (LLM Gateway) + **Tailwind CSS**
+> Working title: **Thoth**  
+> Tagline: **Many models in. One written answer out.**  
+> Positioning: **Cross‑model source of truth for humans and agents.**
 
 ---
 
 ## 1. Origin Story & Motivation
 
-### 1.1. The Chicken Joke Phenomenon
+### 1.1. The Chicken Joke & the Missing Oracle
 
-We started from a simple but deep observation about **deterministic decoding** in LLMs:
+The project started from a small but striking observation about **deterministic decoding** in LLMs.
 
-* When we set decoding to be **deterministic** (e.g., `temperature = 0`, `top_k = 1`), many different LLMs (Gemini, Claude, Llama, etc.) will often answer the prompt:
+Set multiple LLMs to:
 
-  > "Tell me a joke."
+- `temperature = 0`
+- `top_k = 1`
 
-  with the **same joke**:
+Then ask all of them:
 
-  > *"Why did the chicken cross the road? To get to the other side."*
+> **"Tell me a joke."**
 
-This suggests that across massive human training data, there exists a **dominant, universal, statistically highest-probability joke**. In other words, the LLMs have converged on a shared **cultural prior**.
+Different vendors, architectures, and training runs **collapse to essentially the same joke**:
 
-### 1.2. From Joke to Truth Estimation
+> *"Why did the chicken cross the road? To get to the other side."*
 
-The key insight:
+This suggests two things:
 
-> If multiple independently-trained LLMs, under deterministic decoding, converge on the same answer, that answer is a strong candidate for a **shared prior** – a kind of **consensus signal** about how “the human internet” usually answers that question.
+1. There exists a **dominant, universal, statistically highest‑probability answer** to certain questions across human training data.
+2. Deterministic decoding across models acts like a probe into that **shared prior**.
 
-This is **not** a guarantee of objective truth, but it is:
+Now contrast that with how humans search for truth today:
 
-* A **strong probabilistic signal** of what is widely believed, written, and reinforced.
-* Potentially useful for **truth estimation**, hallucination detection, and understanding **where AI models agree or disagree**.
+- We ask friends, read blogs, scroll social feeds.
+- We search Google and get **10 slightly different answers**.
+- We ask one LLM (usually ChatGPT) and **trust it blindly**.
+- When different sources conflict, there is **no canonical place** to get a single, high‑confidence answer.
 
-From here, we defined the goal:
+There is **no modern “oracle”** that says: *"Here is what the best models in the world all agree is the answer."*
 
-> Build a tool that lets users ask short questions and see **how strongly different LLMs agree** under deterministic settings. High agreement ≈ strong shared prior; low agreement ≈ ambiguity, controversy, or underspecification.
+**Thoth** is that oracle.
 
-We want to capture this idea as a **hackathon project**.
+### 1.2. From Joke to Golden Truth
+
+The central insight behind Thoth:
+
+> If multiple independently‑trained frontier LLMs, under deterministic decoding, converge on the **same answer**, that answer is the best available **golden truth candidate** we have today.
+
+It is not philosophically perfect truth, but in practice:
+
+- These models are trained on **most of the written internet**.
+- They encode **aggregated human knowledge and behavior**.
+- With greedy decoding, they surface the **single highest‑confidence answer** they can.
+
+If we:
+
+1. Take the **best models** from different vendors, and
+2. Force them to answer deterministically, and
+3. Only trust answers where they **strongly agree**,
+
+…then we have a practical, high‑confidence **source‑of‑truth signal** that’s **better than any individual source**.
+
+Thoth’s promise:
+
+> **When Thoth speaks, it’s because the best models all said the same thing.**
 
 ---
 
 ## 2. Concept Overview
 
-### 2.1. One-line Pitch
+### 2.1. One‑Line Idea
 
-> **"Ask a question. See what the models agree on."**
-> A web app that queries multiple LLMs with deterministic decoding and computes a **consensus score** to visualize how strongly they agree on an answer.
+> **Thoth asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a single golden answer plus a consensus score so humans and agents can treat it as a source‑of‑truth signal.**
 
-### 2.2. What It Is (and Is Not)
+### 2.2. What Thoth Is
 
-**Is:**
+Thoth is:
 
-* A **consensus / prior estimator** across multiple LLMs.
-* A way to visualize **cross-model agreement** on short questions.
-* A tool to explore the difference between **facts, norms, and opinions**.
+- A **source‑of‑truth service** that sits in front of multiple LLMs.
+- A **web app** for people who want to check:
+  - "What do the best models agree on here?"
+- An **API** for agents and apps that need a **truth‑prior**:
+  - Only act when consensus is high.
+  - Escalate to humans when consensus is low.
 
-**Is NOT:**
+Thoth is **not**:
 
-* A philosophical oracle of absolute Truth.
-* A guarantee that consensus = correctness (models can agree on hallucinations).
-* A replacement for human judgment.
+- A philosophical oracle of absolute reality.
+- A guarantee that consensus always means correctness.
+- A replacement for careful reasoning or domain expertise.
 
-We intentionally frame this as **“consensus / priors”**, not "the one true answer".
+But given how humans already behave today—trusting a single LLM as truth—Thoth is a **strict upgrade**:
 
----
-
-## 3. High-Level Product Design
-
-### 3.1. User Flow
-
-1. User visits the website.
-2. Enters a **short question** (e.g. "What is the capital of France?", "Who wrote 1984?", "Tell me a joke.").
-3. The app sends that question to multiple LLM providers in **parallel**, each with **deterministic decoding** settings.
-4. The system collects their answers and computes a **consensus score**.
-5. The UI displays:
-
-   * Each model’s answer.
-   * A **consensus meter** (0–100%).
-   * A simple label: **Strong consensus / Partial consensus / Disagreement**.
-
-### 3.2. Example UX Snapshot
-
-* Input box at the top: `"Ask a short question..."`
-* Button: **"Check Consensus"**
-* Results area:
-
-  * Cards for each model:
-
-    * Model name (e.g., `gemini-3.0-flash-lite`, `claude-4-haiku`, `llama-4-8b`).
-    * Text of the answer.
-    * Latency / timing (optional).
-  * A large **consensus gauge** (progress bar or radial meter):
-
-    * e.g., 95% → **Strong consensus**
-    * 75% → **Partial consensus**
-    * 45% → **Disagreement**
+- One trusted LLM → **many top models in agreement**.
+- One unverified answer → **golden answer + consensus score**.
 
 ---
 
-## 4. Technical Design (Hackathon Scope)
+## 3. Product Vision
 
-### 4.1. Stack Choice
+### 3.1. Core User Story
 
-* **Framework**: Next.js (using both frontend & API routes / app router).
-* **Hosting / Infra**: Firebase Cloud (Hosting + optional Firestore / Functions if needed).
-* For hackathon simplicity, we can:
+"Sometimes I just want the **most reliable answer** I can get right now. I’m okay with the world being uncertain, but I want to know:
 
-  * Use Next.js `app` directory and **server actions** or **API routes** for backend calls.
-  * Deploy the Next.js app to Firebase Hosting with rewrites to the Next.js server.
+- When is the answer **clear and stable**?
+- When is it **conflicted or controversial**?
 
-We deliberately keep everything in the **Next.js world**, and treat Firebase as mostly a **deployment + optional database** layer.
+Today I have to:
 
-### 4.2. Deterministic Model Calls
+- Read many sources, or
+- Trust one model blindly.
 
-For each supported model, we will configure **deterministic decoding**:
+I want a place that acts as my **oracle**: one place to ask, and get back the **golden truth answer** plus how confident I should be."
 
-* `temperature = 0`
-* `top_p = 1`
-* `top_k = 1` (or the provider’s closest equivalent)
-* Disable any extra sampling options (if configurable).
+Thoth is that place.
 
-Models to include (initially):
+### 3.2. Thoth in One Diagram
 
-* **OpenAI**: e.g. `gpt-4.1-mini` or similar.
-* **Google Gemini**: e.g. `gemini-2.0-flash` or `gemini-1.5-pro`.
-* **Anthropic Claude**: e.g. `claude-3.5-sonnet`.
+1. **Input**: Short question from a human or agent.
+2. **Model Fan‑Out**: Thoth queries multiple frontier models (e.g., Gemini 3.0 Flash Lite, Claude 4 Haiku, Llama 4) via Vertex AI with deterministic decoding.
+3. **Agreement Engine**: Thoth compares the answers using exact match + embeddings, computes a consensus score.
+4. **Golden Answer Selection**:
+   - If consensus is high, Thoth selects a single representative answer and treats it as the **golden answer**.
+   - If consensus is low, Thoth may return multiple divergent answers and a warning.
+5. **Output**: JSON payload + UI view containing:
+   - Golden answer
+   - Consensus score `[0, 1]`
+   - Label: **Strong consensus / Partial consensus / Disagreement**
+   - Per‑model answers for transparency
 
-We can start with **2 models** (e.g. GPT + Gemini) for simplicity, and add Claude if time and API keys permit.
+---
 
-### 4.3. Agreement / Similarity Metric
+## 4. Technical Design (Aligned with Thoth’s Philosophy)
 
-**Baseline approach (hackathon-friendly):**
+### 4.1. Stack & Infrastructure
 
-1. **Normalize** each answer:
+We follow the agreed stack:
 
-   * Lowercase.
-   * Strip punctuation.
-   * Collapse whitespace.
+- **Frontend & Backend**: Next.js (App Router)
+- **Auth & Persistence**: Firebase (Auth, Firestore, Hosting)
+- **LLM Gateway**: Vertex AI (Google Cloud, Application Default Credentials)
+- **Styling**: Tailwind CSS
 
-2. **Exact string match**:
+Principles:
 
-   * If all normalized answers are identical, set consensus score = 1.0 (100%).
+- Keep everything inside **Next.js** to minimize context switching.
+- Use **Firebase** wherever possible for auth, storage, and hosting.
+- Use **Vertex AI** to access multiple LLM providers (Gemini, Claude, Llama) through **one gateway**, no direct vendor keys in the app.
 
-3. If not identical, compute **semantic similarity**:
+### 4.2. Deterministic Decoding as a Truth Probe
 
-   * Get embeddings for each answer (using a single provider’s embedding API).
-   * Compute pairwise cosine similarities between all model answers.
-   * Average the pairwise similarities → a consensus score between 0 and 1.
+Thoth’s core assumption:
 
-4. Map consensus score to human-friendly labels:
+> Greedy decoding (`temperature = 0`) reveals each model’s **highest‑confidence answer**.
 
-   * ≥ 0.90 → **Strong consensus**
-   * 0.70–0.90 → **Partial consensus**
-   * < 0.70 → **Disagreement**
+For each model call we:
 
-This gives us a **quick, explainable metric** that’s good enough for a hackathon demo.
+- Set `temperature = 0`.
+- Set `top_k = 1` or the closest equivalent parameter per provider.
+- Disable any stochastic sampling options.
 
-### 4.4. API Contract (Internal)
+We use the **latest and lightest** production‑ready models available via Vertex AI to keep latency and cost low while maintaining quality, e.g.:
 
-`POST /api/consensus`
+- **Gemini 3.0 Flash Lite**
+- **Claude 4 Haiku**
+- **Llama 4** (appropriate size via Model Garden)
 
-Request body:
+All calls are executed **in parallel** (e.g. `Promise.all`) so that Thoth feels as fast as a single model call.
+
+### 4.3. Consensus & Golden Answer Computation
+
+1. **Normalization**
+   - Lowercase, strip punctuation, normalize whitespace.
+
+2. **Exact Match Check**
+   - If all normalized answers are identical → `consensusScore = 1.0`.
+
+3. **Semantic Similarity**
+   - Use a Vertex AI embedding model to embed each answer.
+   - Compute pairwise cosine similarities between all answer vectors.
+   - Average the pairwise similarities → `consensusScore ∈ [0, 1]`.
+
+4. **Label Mapping**
+   - `≥ 0.90` → **Strong consensus** (golden truth candidate)
+   - `0.70–0.89` → **Partial consensus** (usable with caution)
+   - `< 0.70` → **Disagreement** (no single golden answer)
+
+5. **Golden Answer Selection**
+   - When consensus is strong, pick the **shortest, cleanest** answer as the golden answer (e.g., via simple heuristics or an LLM‑based selector).
+   - When consensus is partial, optionally let an LLM summarize the cluster into a **single synthesized golden answer** while exposing raw answers.
+   - When disagreement dominates, **do not pick a golden answer**; instead, surface the disagreement and encourage human judgment.
+
+This keeps Thoth honest: it only speaks with authority when the models actually agree.
+
+### 4.4. API Contract (MVP)
+
+`POST /api/thoth`
+
+Request:
 
 ```json
 {
@@ -175,199 +213,151 @@ Request body:
 }
 ```
 
-Response body (example):
+Response (example):
 
 ```json
 {
   "question": "Who wrote 1984?",
+  "goldenAnswer": "1984 was written by George Orwell.",
+  "consensusScore": 0.98,
+  "consensusLabel": "strong_consensus",
   "models": [
     {
-      "name": "gpt-4.1-mini",
-      "provider": "openai",
+      "name": "gemini-3.0-flash-lite",
+      "provider": "google",
       "answer": "1984 was written by George Orwell.",
-      "latencyMs": 820
+      "latencyMs": 530
     },
     {
-      "name": "gemini-2.0-flash",
-      "provider": "google",
+      "name": "claude-4-haiku",
+      "provider": "anthropic",
       "answer": "The novel '1984' was written by George Orwell.",
       "latencyMs": 610
+    },
+    {
+      "name": "llama-4",
+      "provider": "meta",
+      "answer": "1984 was written by George Orwell.",
+      "latencyMs": 700
     }
-  ],
-  "consensusScore": 0.97,
-  "consensusLabel": "strong_consensus"
+  ]
 }
 ```
 
-The UI can use this JSON to render the results.
+Agents can then:
 
-### 4.5. Optional: Persistence
-
-If time allows, we can store results:
-
-* **Firestore** or SQLite-like store (if we run Next.js somewhere with a filesystem).
-* Schema idea:
-
-  * `questions` collection:
-
-    * `id`
-    * `question`
-    * `createdAt`
-
-  * `answers` collection (or subcollection):
-
-    * `questionId`
-    * `modelName`
-    * `provider`
-    * `answer`
-    * `latencyMs`
-
-  * `consensus` collection:
-
-    * `questionId`
-    * `consensusScore`
-    * `consensusLabel`
-
-This would enable a **public leaderboard** of interesting questions later.
+- Treat `goldenAnswer` as the default action plan when `consensusLabel` is strong.
+- Request human review or alternate tools when consensus is partial or disagreement.
 
 ---
 
-## 5. Interpretations & Philosophy
+## 5. Experience & Storytelling
 
-### 5.1. Consensus vs Truth
+### 5.1. Web App
 
-We need to be explicit in messaging:
+The Thoth web UI will:
 
-* **High consensus** means:
+- Let users type a **short question**.
+- Show **Thoth’s golden answer** at the top.
+- Display:
+  - Consensus score + label.
+  - Per‑model answers for transparency.
+- Highlight when:
+  - "Thoth speaks" (strong consensus).
+  - "Thoth is uncertain" (partial / disagreement).
 
-  * Multiple large, independently-trained LLMs, all using deterministic decoding, produced **very similar answers**.
-  * There is likely a **strong shared prior** in human training data for that question.
+This reinforces the idea that Thoth is an **oracle that only speaks confidently when the models do.**
 
-* **Low consensus** means:
+### 5.2. Demo Flow
 
-  * The question is ambiguous, controversial, or under-specified.
-  * Different models, with different architectures and alignment strategies, diverge.
+1. Ask: `Tell me a joke` → all models converge → Thoth returns the classic chicken joke as the **golden answer** with very high consensus.
+2. Ask: `What is the capital of France?` → perfect agreement → golden answer with near‑perfect consensus.
+3. Ask: `When will AGI arrive?` → answers diverge → Thoth refuses to pick a golden answer, instead shows disagreement and warns that there is no stable truth here.
 
-This is **probabilistic truth estimation**, not an ultimate arbiter of reality.
+In under a minute, people see:
 
-### 5.2. The "Global Maximum" Idea
-
-The chicken joke example led to the idea:
-
-> Some questions have a **global maximum** in LLM answer space – a single answer that dominates models trained on human text.
-
-Our tool lets users explore:
-
-* Which questions are like "Tell me a joke" (strong global maximum/consensus).
-* Which questions produce **multiple local maxima** (opinions, norms, predictions).
-
-This is interesting for:
-
-* AI safety & alignment discussions.
-* Epistemology (how AI models encode human beliefs).
-* Product teams who want to detect hallucinations or unstable answers.
+- Thoth as a living **source‑of‑truth API**.
+- How "golden answers" emerge from deterministic cross‑model agreement.
+- When Thoth is willing to speak—and when it steps back.
 
 ---
 
-## 6. Hackathon Scope & Stretch Goals
+## 6. Philosophy: Thoth as Today’s Best Oracle
 
-### 6.1. MVP (Must-Haves)
+### 6.1. Why LLMs Are Our Best Information Source
 
-* [ ] Next.js app with a **single input page**.
-* [ ] `POST /api/consensus` endpoint.
-* [ ] Integration with at least **2 LLM providers** with deterministic settings (e.g., GPT + Gemini).
-* [ ] Simple **consensus scoring** based on embeddings.
-* [ ] Visual **consensus meter** + model answers.
+Whether we like it or not, LLMs are already:
 
-### 6.2. Nice-to-Have Features
+- Trained on more text than any human can read.
+- Used by millions of people daily as a primary knowledge tool.
+- Embedded into search engines, copilots, agents, and workflows.
 
-* [ ] **Third LLM** (e.g., Claude Sonnet) for richer consensus.
-* [ ] Basic **history list** (recent questions & consensus scores).
-* [ ] Simple **leaderboard**:
+Most people **already treat them as oracles**, but:
 
-  * “Strongest consensus questions”
-  * “Most disagreement questions”
-* [ ] **Explanatory summary**:
+- They usually use only **one** model.
+- They do not control decoding.
+- They have **no visibility** into cross‑model agreement.
 
-  * Use an LLM to generate a short paragraph:
+Thoth makes this behavior safer and more transparent by:
 
-    > "Here’s why the models agree/disagree on this question."
+- Forcing deterministic decoding (highest‑confidence answers).
+- Requiring agreement across **multiple top models**.
+- Exposing a numeric consensus score and raw answers.
 
-### 6.3. Stretch / Post-Hackathon Ideas
+### 6.2. Consensus vs Truth
 
-* [ ] User upvotes: allow humans to vote which answer seems most correct.
+We stay humble:
 
-  * Compare **model consensus vs human consensus**.
-* [ ] Tagging questions as **Fact / Opinion / Prediction / Value judgment** using an LLM.
-* [ ] Public API (e.g. `/api/consensus?q=...`) for developers.
-* [ ] Research mode: export data for analysis (e.g. CSV of questions + answers + scores).
+- High consensus ≠ guaranteed truth.
+- Low consensus ≠ guaranteed falsehood.
 
----
+What Thoth gives is the **best practical truth signal** available today:
 
-## 7. Naming, Branding & Story
+- Better than a single model.
+- Better than skimming a few random links.
+- Measurable, explainable, and inspectable.
 
-### 7.1. Possible Names
+The guiding mental model:
 
-* **Consensus Oracle** – emphasizes agreement.
-* **Priorscope** – like a “telescope for priors”.
-* **Many Minds** – many models, one consensus.
-* **Priors Meter** – more technical, focused on probabilities.
-
-### 7.2. Taglines
-
-* "Ask a question. See what the models agree on."
-* "Visualize cross-model consensus for any question."
-* "Where many AIs converge (or disagree)."
-* "Explore the shared priors of the world’s largest language models."
-
-### 7.3. Demo Story (for Judges)
-
-1. Start with the **chicken joke story**:
-
-   * Deterministic settings → multiple models → same classic joke.
-   * This reveals a dominant cultural prior encoded across human data.
-
-2. Then show the app:
-
-   * Ask “Tell me a joke” → show consensus.
-   * Ask a factual question → show strong consensus (e.g., "Capital of France").
-   * Ask a controversial/predictive question → show disagreement.
-
-3. Conclude:
-
-   * This tool helps us see where AI models **strongly agree**, and where the world (and its data) is still **uncertain or divided**.
+> **Thoth is not the god of truth; Thoth is the scribe who faithfully records what many powerful models say when asked deterministically.**
 
 ---
 
-## 8. Open Questions & Future Directions
+## 7. Scope for First MVP
 
-* How to systematically **evaluate** the correlation between consensus and factual correctness?
-* How to handle **model updates** (new model versions changing priors)?
-* How to communicate uncertainty responsibly so users don’t over-trust consensus?
-* Could this be turned into:
+**MVP Features**
 
-  * A **research platform** for epistemology & AI safety?
-  * An internal **hallucination detection** tool for companies?
-  * A **teaching tool** about how LLMs learn from human data?
+- Next.js app with a single **Ask Thoth** page.
+- Firebase Auth (optional sign‑in) + Firestore logging of questions and answers.
+- Vertex AI integration to call:
+  - Gemini 3.0 Flash Lite
+  - Claude 4 Haiku
+  - Llama 4
+- Deterministic decoding + parallel fan‑out.
+- Basic consensus scoring (exact match + embeddings).
+- Golden answer selection with score + label.
 
----
+**Stretch**
 
-## 9. Quick Recap of Key Insights from the Conversation
-
-* Deterministic decoding (`temperature = 0`, `top_k = 1`) pushes LLMs to their **highest-probability answers**.
-* Across multiple frontier models, some prompts (like "Tell me a joke") lead to **the same answer**, indicating a **shared global maximum**.
-* This suggests we can approximate **shared human priors** by:
-
-  * Querying multiple models deterministically.
-  * Measuring how similar their answers are.
-* A hackathon-scale product can:
-
-  * Provide a clean UI for asking questions.
-  * Call multiple LLMs with deterministic settings.
-  * Compute and visualize **consensus**.
-* The result is a **Consensus / Prior Estimator** — a step toward practical **truth estimation tools** without over-claiming philosophical certainty.
+- Public REST API key for authenticated users.
+- History view with previous Thoth answers.
+- Research mode: export questions + answers + consensus.
+- Advanced consensus metrics.
 
 ---
 
-*End of memo – this document is the canonical reference for the “LLM Consensus Oracle / Truth Estimator” hackathon idea, its story, and its initial design.*
- 
+## 8. Recap
+
+- People need a place to ask for the **most reliable answer** available right now.
+- There is no single human or website that can do this.
+- But we do have multiple **frontier LLMs** trained on most human text.
+- Under greedy decoding, each of them gives its own **highest‑confidence answer**.
+- When those answers **all agree**, that is our best candidate for a **golden truth answer**.
+
+**Thoth** is the product that:
+
+- Asks multiple frontier LLMs the same question with deterministic decoding.
+- Measures how strongly they agree.
+- Returns a **golden answer and a consensus score**.
+
+Many models in. One written answer out. Thoth as the closest thing we have to an oracle today.

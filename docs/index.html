@@ -4,35 +4,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LLM Consensus Oracle</title>
-  <meta name="description" content="LLM Consensus Oracle compares answers from multiple LLMs to estimate how strongly AI models agree on a question." />
+  <title>Thoth — Cross‑Model Source of Truth</title>
+  <meta name="description" content="Thoth asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a golden answer plus a consensus score." />
 
-  <!-- Tailwind (Windtail) CDN -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Flowbite CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/flowbite@2.5.1/dist/flowbite.min.css" />
-
-  <!-- Tailwind Config for brand colors -->
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f5f7ff',
-              100: '#e4e8ff',
-              200: '#c3caff',
-              300: '#9ca5ff',
-              400: '#6f74ff',
-              500: '#4a4dff',
-              600: '#3534db',
-              700: '#2a29af',
-              800: '#24258a',
-              900: '#1f216f',
-              950: '#0f103d'
-            }
+            slate: tailwind.colors.slate
           }
         }
       }
@@ -40,18 +24,8 @@
   </script>
 
   <style>
-    /* Smooth scrolling & nicer focus styles */
     html {
       scroll-behavior: smooth;
-    }
-
-    :focus {
-      outline: none;
-    }
-
-    :focus-visible {
-      outline: 2px solid #4a4dff;
-      outline-offset: 2px;
     }
   </style>
 </head>
@@ -61,24 +35,25 @@
     <!-- NAVBAR -->
     <header class="fixed inset-x-0 top-0 z-30 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-xl">
       <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 lg:px-0" aria-label="Global">
-          <div class="flex items-center gap-3">
-            <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand-500/10 ring-2 ring-brand-500/40">
-              <span class="text-lg font-semibold text-brand-300">π</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="text-sm font-semibold tracking-tight">Consensus Oracle</span>
-              <span class="text-xs text-slate-400">LLM Truth Estimator</span>
-            </div>
-          </div>        <div class="hidden items-center gap-8 text-sm text-slate-300 md:flex">
-          <a href="#how-it-works" class="hover:text-brand-200">How it works</a>
-          <a href="#use-cases" class="hover:text-brand-200">Use cases</a>
-          <a href="#pricing" class="hover:text-brand-200">Pricing</a>
-          <a href="#faq" class="hover:text-brand-200">FAQ</a>
+        <div class="flex items-center gap-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-800/60 ring-2 ring-slate-600/60">
+            <span class="text-lg font-semibold text-slate-100">𓁟</span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-sm font-semibold tracking-tight">Thoth</span>
+            <span class="text-xs text-slate-400">Cross‑model source of truth</span>
+          </div>
+        </div>
+        <div class="hidden items-center gap-8 text-sm text-slate-300 md:flex">
+          <a href="#how-it-works" class="hover:text-slate-100">How it works</a>
+          <a href="#use-cases" class="hover:text-slate-100">Use cases</a>
+          <a href="#pricing" class="hover:text-slate-100">Pricing</a>
+          <a href="#faq" class="hover:text-slate-100">FAQ</a>
         </div>
 
         <div class="flex items-center gap-3">
-          <a href="#signin" class="hidden text-xs font-medium text-slate-300 hover:text-brand-200 md:inline-flex">Sign in</a>
-          <a href="#demo" class="inline-flex items-center rounded-full bg-brand-500 px-4 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:bg-brand-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400">Try the Demo</a>
+          <a href="#signin" class="hidden text-xs font-medium text-slate-300 hover:text-slate-100 md:inline-flex">Sign in</a>
+          <a href="#demo" class="inline-flex items-center rounded-full bg-slate-100 px-4 py-1.5 text-xs font-semibold text-slate-950 shadow-lg shadow-slate-100/20 transition hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-200">Try Thoth</a>
         </div>
       </nav>
     </header>
@@ -89,29 +64,30 @@
         <div class="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-16 lg:flex-row lg:items-center lg:py-24 lg:px-0">
           <!-- Left copy -->
           <div class="relative z-10 max-w-xl space-y-6">
-            <div class="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-500/5 px-3 py-1 text-[11px] font-medium text-brand-100 shadow-sm shadow-brand-500/30">
+            <p class="inline-flex items-center gap-2 rounded-full border border-slate-600/60 bg-slate-900/60 px-3 py-1 text-[11px] font-medium text-slate-200">
               <span class="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-              <span>Hackathon MVP • Multi-LLM Consensus</span>
-            </div>
+              <span>Hackathon MVP • Cross‑model source of truth</span>
+            </p>
 
             <h1 class="text-balance text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-              Find out what <span class="bg-gradient-to-r from-brand-300 via-emerald-300 to-sky-300 bg-clip-text text-transparent">many AIs agree on</span> — in one click.
+              Ask once. Hear what
+              <span class="bg-gradient-to-r from-slate-100 via-slate-200 to-slate-50 bg-clip-text text-transparent">many models agree on</span>.
             </h1>
 
             <p class="text-pretty text-sm leading-relaxed text-slate-300 sm:text-base">
-              Consensus Oracle asks multiple frontier models (Gemini, Claude, Llama & more) your question with deterministic settings
-              and measures how strongly their answers align. High agreement → strong shared prior. Low agreement → ambiguity,
-              controversy, or hallucination risk.
+              Thoth asks multiple frontier LLMs the same question with deterministic decoding, compares their answers, and
+              returns a <span class="font-semibold">golden answer</span> plus a <span class="font-semibold">consensus score</span>.
+              When the best models all say the same thing, you can safely treat it as a strong source‑of‑truth signal.
             </p>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a href="#early-access" class="inline-flex items-center justify-center rounded-full bg-brand-500 px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-brand-500/40 transition hover:bg-brand-400 focus-visible:ring-2 focus-visible:ring-brand-300">
-                Try a consensus query
+              <a href="#early-access" class="inline-flex items-center justify-center rounded-full bg-slate-100 px-5 py-2 text-xs font-semibold text-slate-950 shadow-lg shadow-slate-100/30 transition hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-slate-200">
+                Try a Thoth query
                 <svg class="ml-2 h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14m0 0-6-6m6 6-6 6" />
                 </svg>
               </a>
-              <button type="button" class="inline-flex items-center text-xs font-medium text-slate-300 hover:text-brand-200" data-modal-target="demo-modal" data-modal-toggle="demo-modal">
+              <button type="button" class="inline-flex items-center text-xs font-medium text-slate-300 hover:text-slate-100" data-modal-target="demo-modal" data-modal-toggle="demo-modal">
                 Watch 60s demo
                 <svg class="ml-1.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M6.5 5.5a1 1 0 0 1 1.514-.857l6 3.5a1 1 0 0 1 0 1.714l-6 3.5A1 1 0 0 1 6.5 12.5v-7Z" />
@@ -121,15 +97,15 @@
 
             <div class="flex flex-wrap gap-4 pt-2 text-[11px] text-slate-400">
               <div class="flex items-center gap-1.5">
-                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/10 text-[10px] text-emerald-300">✓</span>
-                <span>Deterministic multi-LLM calls</span>
+                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
+                <span>Deterministic multi‑LLM calls</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-brand-500/10 text-[10px] text-brand-200">✓</span>
-                <span>Consensus score per question</span>
+                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
+                <span>Golden answer + consensus score</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-500/10 text-[10px] text-slate-200">✓</span>
+                <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
                 <span>Built for agents, evals & research</span>
               </div>
             </div>
@@ -137,15 +113,20 @@
 
           <!-- Right visual: mock app card -->
           <div class="relative flex flex-1 justify-center lg:justify-end">
-            <div class="relative w-full max-w-md rounded-3xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-xl shadow-brand-500/10 backdrop-blur">
+            <div class="relative w-full max-w-md rounded-3xl border border-slate-800/80 bg-slate-900/70 p-4 shadow-xl shadow-slate-900/50 backdrop-blur">
               <div class="mb-3 flex items-center justify-between">
                 <div>
-                  <p class="text-[11px] font-medium text-slate-300">Consensus query</p>
+                  <p class="text-[11px] font-medium text-slate-300">Thoth query</p>
                   <p class="text-[10px] text-slate-500">"Tell me a joke"</p>
                 </div>
-                <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
-                  97% consensus
+                <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-900">
+                  0.97 consensus
                 </span>
+              </div>
+
+              <div class="mb-3 rounded-2xl border border-slate-800/80 bg-slate-950/80 px-3 py-2">
+                <p class="text-[10px] font-medium uppercase tracking-wide text-slate-400">Golden answer</p>
+                <p class="mt-1 text-[11px] text-slate-100">Why did the chicken cross the road? To get to the other side.</p>
               </div>
 
               <div class="space-y-2.5 text-[11px]">
@@ -176,8 +157,8 @@
 
               <div class="mt-4 flex items-center justify-between border-t border-slate-800/80 pt-3">
                 <div class="text-[10px] text-slate-400">
-                  <p>Shared prior strength: <span class="font-semibold text-emerald-300">very high</span></p>
-                  <p class="text-[9px]">Higher consensus often correlates with stable, widely-shared knowledge.</p>
+                  <p>Shared prior strength: <span class="font-semibold text-slate-100">very high</span></p>
+                  <p class="text-[9px]">Thoth only speaks confidently when many strong models agree</p>
                 </div>
                 <button class="inline-flex items-center rounded-full bg-slate-800 px-3 py-1 text-[10px] font-medium text-slate-100 hover:bg-slate-700">
                   Explore disagreement
@@ -193,34 +174,34 @@
         <div class="mx-auto max-w-6xl px-4 py-16 lg:px-0 lg:py-20">
           <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">How Consensus Oracle works</h2>
-              <p class="mt-1 max-w-xl text-sm text-slate-400">Under the hood, Consensus Oracle calls multiple models with deterministic
-                decoding and uses embeddings to compute how aligned their answers are.</p>
+              <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">How Thoth works</h2>
+              <p class="mt-1 max-w-xl text-sm text-slate-400">Under the hood, Thoth calls multiple models with deterministic decoding,
+                compares their answers, and selects a golden answer only when consensus is strong.</p>
             </div>
-            <p class="max-w-xs text-xs text-slate-500">Designed as a low-friction API and dashboard you can drop into eval
-              pipelines, agent frameworks, or research experiments.</p>
+            <p class="max-w-xs text-xs text-slate-500">Designed as a low‑friction API and dashboard you can drop into eval pipelines,
+              agent frameworks, or research experiments.</p>
           </div>
 
           <div class="grid gap-6 md:grid-cols-3">
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
-              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/20 text-[13px] text-brand-100">1</div>
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-[13px] text-slate-100">1</div>
               <h3 class="text-sm font-semibold text-slate-50">Ask one question</h3>
-              <p class="text-xs text-slate-400">Submit a short, well-posed question via the web UI or API. Consensus Oracle
-                normalizes and logs it for reproducible experiments.</p>
+              <p class="text-xs text-slate-400">Submit a short, well‑posed question via the web UI or API. Thoth normalizes and
+                logs it for reproducible experiments.</p>
             </div>
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
-              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/20 text-[13px] text-brand-100">2</div>
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-[13px] text-slate-100">2</div>
               <h3 class="text-sm font-semibold text-slate-50">Query multiple models</h3>
-              <p class="text-xs text-slate-400">We call Gemini, Claude, Llama (and optionally open-source models) with
-                temperature 0 and greedy decoding to remove randomness and expose the underlying priors.</p>
+              <p class="text-xs text-slate-400">Thoth calls Gemini, Claude, and Llama (via Vertex AI) with temperature 0 and greedy
+                decoding to surface each model’s highest‑confidence answer.</p>
             </div>
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
-              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/20 text-[13px] text-brand-100">3</div>
-              <h3 class="text-sm font-semibold text-slate-50">Compute consensus score</h3>
-              <p class="text-xs text-slate-400">Answers are embedded into a shared vector space; Consensus Oracle calculates a
-                consensus score and surfaces agreements, disagreements, and edge cases.</p>
+              <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-[13px] text-slate-100">3</div>
+              <h3 class="text-sm font-semibold text-slate-50">Compute consensus & golden answer</h3>
+              <p class="text-xs text-slate-400">Answers are compared using exact match and embeddings; Thoth calculates a consensus
+                score and, when agreement is strong, surfaces a single golden answer plus per‑model details.</p>
             </div>
           </div>
         </div>
@@ -230,9 +211,9 @@
       <section id="use-cases" class="border-b border-slate-800/80 bg-slate-950">
         <div class="mx-auto max-w-6xl px-4 py-16 lg:px-0 lg:py-20">
           <div class="mb-8 flex flex-col gap-3">
-            <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Where consensus signals shine</h2>
-            <p class="max-w-2xl text-sm text-slate-400">Consensus isn’t absolute truth, but it’s a powerful heuristic. Consensus Oracle
-              helps you see where your AI systems are confidently aligned vs. potentially hallucinating.</p>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Where Thoth is useful</h2>
+            <p class="max-w-2xl text-sm text-slate-400">Thoth doesn’t claim metaphysical truth—but it does show you when multiple
+              strong models agree so strongly that you can safely treat the answer as a practical source of truth.</p>
           </div>
 
           <div class="grid gap-6 md:grid-cols-3">
@@ -245,15 +226,15 @@
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <h3 class="text-sm font-semibold text-slate-50">Agent orchestration</h3>
-              <p class="text-xs text-slate-400">Route decisions differently when consensus is low: ask a human, switch tools,
-                or request justification instead of blindly trusting a single model.</p>
+              <p class="text-xs text-slate-400">Route decisions differently when consensus is low: ask a human, switch tools, or
+                request justification instead of blindly trusting a single model.</p>
               <span class="mt-auto inline-flex w-fit rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">For agent frameworks</span>
             </div>
 
             <div class="flex flex-col gap-3 rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <h3 class="text-sm font-semibold text-slate-50">Research & teaching</h3>
-              <p class="text-xs text-slate-400">Explore how different models encode priors, where they converge, and how
-                alignment training shapes their behavior on the same prompt.</p>
+              <p class="text-xs text-slate-400">Explore how different models encode priors, where they converge, and how alignment
+                training shapes their behavior on the same prompt.</p>
               <span class="mt-auto inline-flex w-fit rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">For labs & classrooms</span>
             </div>
           </div>
@@ -265,52 +246,51 @@
         <div class="mx-auto max-w-6xl px-4 py-16 lg:px-0 lg:py-20">
           <div class="mb-8 flex flex-col gap-3 text-center">
             <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Start with the hackathon edition</h2>
-            <p class="mx-auto max-w-xl text-sm text-slate-400">Simple, transparent pricing while we iterate in public. Ideal for
-              hackathons, side projects, and early adopters.
-            </p>
+            <p class="mx-auto max-w-xl text-sm text-slate-400">Simple, transparent access while we iterate in public. Ideal for
+              hackathons, side projects, and early adopters.</p>
           </div>
 
-          <div class="mx-auto max-w-3xl rounded-3xl border border-brand-500/40 bg-slate-950/90 p-6 shadow-xl shadow-brand-500/30 lg:p-8">
+          <div class="mx-auto max-w-3xl rounded-3xl border border-slate-700/70 bg-slate-950/90 p-6 shadow-xl shadow-slate-900/60 lg:p-8">
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div class="text-left">
-                <p class="text-xs font-semibold uppercase tracking-wide text-brand-200">Hackathon Early Access</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-300">Hackathon Early Access</p>
                 <p class="mt-1 text-lg font-semibold text-slate-50">Free while we’re in beta</p>
-                <p class="mt-1 text-xs text-slate-400">Bring Consensus Oracle to your next hackathon project or internal experiment.
-                  No credit card required for early access.</p>
+                <p class="mt-1 text-xs text-slate-400">Bring Thoth to your next hackathon project or internal experiment. No credit
+                  card required for early access.</p>
               </div>
               <div class="text-left md:text-right">
                 <p class="text-2xl font-semibold text-slate-50">$0<span class="text-sm font-normal text-slate-400"> / month</span></p>
-                <p class="text-[11px] text-slate-500">Fair use limits • BYO API keys</p>
+                <p class="text-[11px] text-slate-500">Fair use limits • BYO model access</p>
               </div>
             </div>
 
             <div class="mt-5 grid gap-4 text-xs text-slate-300 md:grid-cols-2">
               <ul class="space-y-1.5">
                 <li class="flex items-center gap-2">
-                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/10 text-[10px] text-emerald-300">✓</span>
-                  <span>UI for manual consensus queries</span>
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
+                  <span>UI for manual Thoth queries</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/10 text-[10px] text-emerald-300">✓</span>
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
                   <span>REST API for programmatic access</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/10 text-[10px] text-emerald-300">✓</span>
-                  <span>Up to 3 providers per query</span>
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
+                  <span>Cross‑model calls via Vertex AI</span>
                 </li>
               </ul>
 
               <ul class="space-y-1.5">
                 <li class="flex items-center gap-2">
-                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-600/20 text-[10px] text-slate-200">✓</span>
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
                   <span>Question history & exports (CSV)</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-600/20 text-[10px] text-slate-200">✓</span>
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
                   <span>Discord support & feedback loop</span>
                 </li>
                 <li class="flex items-center gap-2">
-                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-600/20 text-[10px] text-slate-200">✓</span>
+                  <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-slate-800 text-[10px] text-slate-100">✓</span>
                   <span>Priority access to future research features</span>
                 </li>
               </ul>
@@ -319,12 +299,12 @@
             <div id="early-access" class="mt-6 flex flex-col gap-3 border-t border-slate-800/80 pt-4 md:flex-row md:items-center md:justify-between">
               <form class="flex w-full flex-col gap-2 sm:flex-row">
                 <label for="email" class="sr-only">Work email</label>
-                <input id="email" type="email" required placeholder="you@company.com" class="w-full rounded-full border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-brand-400 focus:ring-1 focus:ring-brand-400" />
-                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-brand-500 px-5 py-2 text-xs font-semibold text-white shadow-md shadow-brand-500/40 transition hover:bg-brand-400 focus-visible:ring-2 focus-visible:ring-brand-300">
+                <input id="email" type="email" required placeholder="you@company.com" class="w-full rounded-full border border-slate-700/80 bg-slate-900/80 px-4 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-slate-200 focus:ring-1 focus:ring-slate-200" />
+                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-slate-100 px-5 py-2 text-xs font-semibold text-slate-950 shadow-md shadow-slate-100/30 transition hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-slate-200">
                   Request early access
                 </button>
               </form>
-              <p class="text-[11px] text-slate-500">We’ll only email you about Consensus Oracle’s beta. No spam.</p>
+              <p class="text-[11px] text-slate-500">We’ll only email you about Thoth’s beta. No spam.</p>
             </div>
           </div>
         </div>
@@ -336,36 +316,37 @@
           <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <h2 class="text-xl font-semibold tracking-tight text-slate-50 sm:text-2xl">Questions & caveats</h2>
-              <p class="mt-1 max-w-xl text-sm text-slate-400">Consensus Oracle is a tool for measuring consensus, not a final arbiter of
-                truth. Here’s how we think about that.</p>
+              <p class="mt-1 max-w-xl text-sm text-slate-400">Thoth measures cross‑model consensus; it isn’t a metaphysical oracle of
+                truth. Here’s how to interpret what it says.</p>
             </div>
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">
             <div class="rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <h3 class="text-sm font-semibold text-slate-50">Does high consensus guarantee truth?</h3>
-              <p class="mt-2 text-xs text-slate-400">No. It simply indicates that multiple models, trained on overlapping human
-                data, strongly agree. That usually correlates with stable, widely accepted knowledge — but they can still
-                agree on a shared hallucination.</p>
+              <p class="mt-2 text-xs text-slate-400">No. It indicates that multiple models, trained on overlapping human data,
+                strongly agree under deterministic decoding. That usually correlates with stable, widely accepted knowledge—but
+                they can still agree on a shared hallucination.</p>
             </div>
 
             <div class="rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
               <h3 class="text-sm font-semibold text-slate-50">What does low consensus tell me?</h3>
               <p class="mt-2 text-xs text-slate-400">Low consensus often marks ambiguity: poorly posed questions, controversial
-                topics, under-specified tasks, or areas where models have different training or alignment. Great places to
-                add human review.</p>
+                topics, under‑specified tasks, or areas where models have different training or alignment. Great places to add
+                human review or alternate tools.</p>
             </div>
 
             <div class="rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
-              <h3 class="text-sm font-semibold text-slate-50">Do you call provider APIs directly?</h3>
-              <p class="mt-2 text-xs text-slate-400">For the hackathon edition, you plug in your own API keys for providers like
-                OpenAI, Google, and Anthropic. We never resell model access; we just orchestrate deterministic calls.</p>
+              <h3 class="text-sm font-semibold text-slate-50">Why use multiple models at all?</h3>
+              <p class="mt-2 text-xs text-slate-400">Most people already treat a single LLM as an oracle. Thoth is a strict
+                upgrade: it only speaks confidently when several strong models, from different vendors, converge on the same
+                answer.</p>
             </div>
 
             <div class="rounded-3xl border border-slate-800/80 bg-slate-900/50 p-5">
-              <h3 class="text-sm font-semibold text-slate-50">Is Consensus Oracle production-ready?</h3>
-              <p class="mt-2 text-xs text-slate-400">Today it’s a fast-moving MVP aimed at hackathons, internal tools, and
-                research workflows. If you’re exploring production integration, we’d love to chat.</p>
+              <h3 class="text-sm font-semibold text-slate-50">Is Thoth production‑ready?</h3>
+              <p class="mt-2 text-xs text-slate-400">Today it’s a fast‑moving MVP aimed at hackathons, internal tools, and research
+                workflows. If you’re exploring production integration, we’d love to chat.</p>
             </div>
           </div>
         </div>
@@ -376,7 +357,7 @@
     <footer class="border-t border-slate-800/80 bg-slate-950/95">
       <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-[11px] text-slate-500 md:flex-row md:items-center md:justify-between lg:px-0">
         <p>
-          © <span id="year">2025</span> Consensus Oracle. Built for hackathons & thoughtful AI teams.
+          © <span id="year">2025</span> Thoth. Built for hackathons & thoughtful AI teams.
         </p>
         <div class="flex flex-wrap items-center gap-3">
           <a href="#" class="hover:text-slate-200">Changelog</a>
@@ -387,12 +368,12 @@
     </footer>
   </div>
 
-  <!-- Demo Modal (Flowbite) -->
+  <!-- Demo Modal -->
   <div id="demo-modal" tabindex="-1" aria-hidden="true" class="fixed inset-0 z-50 hidden h-screen w-screen items-center justify-center overflow-y-auto overflow-x-hidden bg-slate-950/80 backdrop-blur">
     <div class="relative h-full w-full max-w-2xl p-4 md:h-auto">
       <div class="relative rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-xl">
         <div class="mb-3 flex items-center justify-between">
-          <h3 class="text-sm font-semibold text-slate-50">See Consensus Oracle in action</h3>
+          <h3 class="text-sm font-semibold text-slate-50">See Thoth in action</h3>
           <button type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700" data-modal-hide="demo-modal">
             <span class="sr-only">Close modal</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4">
@@ -407,10 +388,6 @@
     </div>
   </div>
 
-  <!-- Flowbite JS -->
-  <script src="https://unpkg.com/flowbite@2.5.1/dist/flowbite.min.js"></script>
-
-  <!-- Dynamic year -->
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>

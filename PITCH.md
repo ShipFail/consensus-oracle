@@ -1,53 +1,167 @@
-# 🧠 LLM Consensus Oracle — Pitch
+# 🪬 Thoth — Pitch
 
-> Many models. One answer. How strong is the world’s prior?
-
----
-
-## ⚡ One-liner (Primary)
-
-**LLM Consensus Oracle shows you how strongly multiple frontier LLMs agree on an answer under deterministic decoding, so humans and agents can instantly tell if a response reflects a strong shared prior or a shaky hallucination.**
+> _"Where all answers are written."_
 
 ---
 
-### 🎯 One-liner Variants
+## ⚡ One‑liner
 
-**YC-flavored (problem/solution angle)**  
-> We’re building LLM Consensus Oracle, which turns Gemini, Claude, and Llama into a single “consensus API” that scores how much they agree on an answer, so you can trust outputs before you ship them to users or agents.
+**Thoth** asks multiple frontier LLMs the same question with **deterministic decoding**, measures how strongly they agree, and returns a **single golden answer plus a consensus score**, so humans and agents can treat it as a **source‑of‑truth signal** instead of trusting a single model.
 
-**Hackathon-flavored (demo angle)**  
-> LLM Consensus Oracle is a live dashboard that asks multiple LLMs the same question and shows a consensus meter, so in one glance you see if the models really agree—or are just hallucinating in different directions.
-
-Pick the one that feels most natural for you on stage.
+> **Tagline / descriptor:** Many models in. One golden answer out.
 
 ---
 
-## 🚀 30-Second YC-Style Elevator Pitch
+## 🚀 YC‑style Elevator Pitch (30 seconds)
 
-Today everyone treats a single LLM’s output as ground truth, but models hallucinate and vendors often disagree—and you have no way to see that.  
-**LLM Consensus Oracle** fixes this by asking multiple frontier models like Gemini, Claude, and Llama the same question with deterministic settings, comparing their answers, and returning a simple **consensus score** and label: strong agreement, partial agreement, or disagreement.  
+Today, when people want the truth, they usually ask **one** LLM (often ChatGPT) and treat its answer as ground truth. But models hallucinate, vendors disagree, and the internet is full of conflicting sources—and you have no visibility into any of that.
 
-You get a web UI and an API that tell you, in one call, whether many independent models converge on the same answer—so you and your agents can treat it as a strong prior, and flag everything else as risky.
+**Thoth** fixes this by asking **multiple frontier models** (via Vertex AI) the **same question** with **greedy, deterministic settings**, comparing their answers, and returning a **consensus score**, a label (strong consensus, partial consensus, disagreement), and a **single golden answer** when agreement is high.
 
----
+You get a web app and an API where humans and agents can query **how strongly the best models in the world agree**, and when they do, treat that answer as the **closest thing we have to a modern oracle**.
 
-## 🎤 45–60s Hackathon Demo Pitch
-
-We built **LLM Consensus Oracle** to answer a simple question:  
-> “Do different LLMs really agree on this answer, or is this just one model’s hallucination?”
-
-Instead of calling a single model, we hit **Gemini, Claude, and Llama** with **deterministic decoding** for the same question, then compute how similar their answers are. We turn that into a **consensus meter** indicating strong agreement, partial agreement, or disagreement.
-
-In the demo, we’ll show three questions:
-
-1. **“Tell me a joke”** → models collapse to the same classic joke → strong consensus.  
-2. **“What is the capital of France?”** → identical answers → strong consensus.  
-3. **“When will AGI arrive?”** → wildly different outputs → clear disagreement.
-
-In under a minute, you see exactly what this does, why it’s real, and how you could plug this “consensus API” into agents, evals, or any app that needs a quick truth-prior check.
+> Many models in. One written truth‑candidate out.
 
 ---
 
-## 🧭 One-Sentence Summary (For Slides)
+## 📚 Background Story
 
-> **LLM Consensus Oracle is a web app and API that measures cross-model agreement between Gemini, Claude, and Llama under deterministic decoding, giving you a fast consensus score to tell strong shared priors from shaky hallucinations.**
+This project started from a small but striking observation:
+
+Set multiple LLMs to deterministic decoding:
+
+- `temperature = 0`
+- `top_k = 1`
+
+Then ask all of them:
+
+> **“Tell me a joke.”**
+
+Different vendors, architectures, and training runs all collapsed to essentially the **same joke**.
+
+That suggested something deeper:
+
+- There exists a **dominant, universal, statistically highest‑probability answer** to certain questions across human training data.
+- Deterministic decoding across models acts like a probe into that **shared prior**.
+
+If that’s true for a joke, what about:
+
+- Basic facts
+- Common sense
+- Safe conventions
+
+Today, people are already treating **a single LLM** as an oracle. Thoth’s bet is simple:
+
+> The most reliable information source we have right now is **many strong models in agreement under deterministic decoding**, not one model on its own.
+
+**Thoth** is named after the Egyptian scribe of the gods — the one who **writes things down**. The project’s goal is similar: write down the **golden answer that many models agree on**, so you can see it, reason about it, and use it as a practical **source‑of‑truth signal**.
+
+---
+
+## 🧩 Problem
+
+Right now, most users and systems:
+
+- Call **one** LLM
+- Get **one** answer
+- Treat it as **the** answer
+
+This causes issues:
+
+- ❓ No sense of **how stable** that answer is across different models
+- ⚔️ Different sources (search, docs, experts, models) **conflict** with each other
+- 🎭 **Hallucinations** look indistinguishable from real facts
+- 🧱 Each vendor is a **black‑box silo**
+- 🔍 There’s no canonical place to ask: _"What do the best models **all** say?"_
+
+Humans need a **single place** they can query for the **highest‑confidence answer** available right now, with a clear signal of when the world is stable vs. when it is conflicted.
+
+---
+
+## ✅ Solution
+
+Instead of trusting a single model, **Thoth** gives you an instant **cross‑model source‑of‑truth check**.
+
+### How Thoth works
+
+1. A user or agent sends a **short question** to Thoth.
+2. Thoth calls multiple LLMs (e.g. Gemini 3.0 Flash Lite, Claude 4 Haiku, Llama 4) via **Vertex AI** with **deterministic decoding**.
+3. Thoth **compares their answers** using exact match + embeddings.
+4. Thoth computes a **consensus score** in `[0, 1]` and a label:
+   - **Strong consensus** — models strongly agree; safe to treat as golden answer
+   - **Partial consensus** — some agreement, some variation; use with caution
+   - **Disagreement** — models diverge; no single golden answer
+5. Thoth returns:
+   - A **golden answer** when consensus is high
+   - Each model’s raw answer for transparency
+   - The consensus score + label
+   - A simple JSON payload for downstream systems
+
+You can plug this into agents, eval pipelines, or dashboards whenever you want to know:
+
+> _"Is there a stable answer that the best models all converge on, or is this inherently shaky?"_
+
+---
+
+## 🎤 Hackathon Demo Flow (45–60 seconds)
+
+On stage, the live demo is simple and visual:
+
+1. Open the Thoth web UI.
+2. Type: `Tell me a joke` → all models converge on the same classic joke → **Strong consensus**, Thoth shows that joke as the **golden answer**.
+3. Type: `What is the capital of France?` → identical answers → **Strong consensus**, golden answer:
+   > "Paris."
+4. Type: `When will AGI arrive?` → models diverge in predictions → **Disagreement**, Thoth **refuses** to pick a golden answer and instead shows the disagreement and a warning.
+
+In under a minute, judges see:
+
+- That the product is real and live
+- How multiple models can be collapsed into **one golden answer + consensus score**
+- Why that’s useful as a **source‑of‑truth signal** for agents and humans
+
+---
+
+## 🌟 Why Thoth Is Interesting
+
+### 1️⃣ Simple mental model
+
+> **One question → many models → one golden answer + consensus score.**
+
+Easy to explain to:
+
+- Hackathon judges
+- YC partners
+- Researchers
+- Engineers building agents
+
+### 2️⃣ Built on top of existing LLMs
+
+No need to train new models. Thoth:
+
+- Plugs into existing **frontier LLMs** through **Vertex AI**
+- Uses **deterministic decoding** as a **truth probe**
+- Wraps it with a thin **consensus + golden answer engine** and UI
+
+This makes it:
+
+- Fast to prototype
+- Cheap to run (lightweight models, parallel calls)
+- Easy to extend later (more models, better metrics)
+
+### 3️⃣ Immediately useful signals
+
+- 🔍 **Truth‑prior check** – if many strong models agree deterministically, treat the answer as a strong truth‑candidate.
+- 🧪 **Eval & research tool** – find questions where models strongly agree or diverge; study stability of model behavior.
+- 🛡️ **Safety gate for agents** – require strong consensus before taking high‑impact actions; route low‑consensus cases to humans or alternative tools.
+
+### 4️⃣ Great story and visuals
+
+- The name **Thoth** anchors the myth: scribe of the gods / keeper of records.
+- The UI centers around a **golden answer box** and a **consensus meter**, which is instantly understandable.
+- The “chicken joke” story is a memorable hook for explaining why deterministic decoding across models reveals a **shared prior**.
+
+---
+
+## 🎯 One‑sentence YC‑style Summary
+
+> **Thoth asks multiple frontier LLMs the same question with deterministic decoding, measures how strongly they agree, and returns a golden answer plus a consensus score so humans and agents can treat it as a practical source‑of‑truth signal instead of trusting a single model.**

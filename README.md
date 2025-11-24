@@ -1,169 +1,145 @@
-# 🧠 LLM Consensus Oracle
+# 🪬 Thoth
 
-> *"Many models. One answer. How strong is the world’s prior?"*
+> _"Where all answers are written."_
 
 <div align="center">
 <img src="./docs/consensus-oracle-logo.webp" alt="AI Consensus Oracle Logo" width=256 height=256/>
 </div>
 
-## ✨ One‑liner
+**Thoth** is a web app + API that asks multiple frontier LLMs the same question with **deterministic decoding**, measures how strongly they agree, and returns a **single golden answer plus a consensus score**, so humans and agents can treat it as a practical **source‑of‑truth signal** instead of trusting a single model.
 
-**LLM Consensus Oracle** is a web app + API that asks multiple frontier LLMs the same question with **deterministic decoding** and measures how strongly they **agree**, exposing hidden *shared priors* in our collective training data.
-
----
-
-## 🚀 Elevator Pitch
-
-Modern LLMs are trained on an unimaginably large slice of human text. Sometimes, when you ask something simple like **"Tell me a joke"**, very different models converge on **the same answer**.
-
-That’s not an accident — it’s a **dominant, universal, statistically highest‑probability answer** emerging across models.
-
-**LLM Consensus Oracle** turns this into a product:
-
-* 🔁 Ask a short question once
-* 🤖 Query multiple LLMs (Gemini, GPT, Claude, etc.) with **deterministic settings**
-* 📊 Compute how similar their answers are
-* 🧭 Use the agreement score as a proxy for **cross‑model consensus**
-
-It’s not a truth machine. It’s a **truth estimator**.
+> Mental model: **One question → many models → one golden answer + consensus score.**
 
 ---
 
-## 🧩 Motivation
+## ✨ Why Thoth
 
-### The Problem
+When people want the truth today, they usually:
 
-Today we mostly:
+- Ask friends or search the web and get conflicting answers, or
+- Ask **one** LLM (often ChatGPT) and trust it blindly.
 
-* Ask **one** model
-* Get **one** answer
-* Treat that as **ground truth**
+Meanwhile:
 
-But in reality:
+- Different sources often **disagree**.
+- LLMs sometimes **hallucinate**.
+- There is **no canonical place** that says:
+  > "Here is what the best models in the world all agree is the answer."
 
-* 🔄 Sampling adds randomness
-* 🧱 Vendors behave differently
-* 🎭 Models hallucinate
-* ⚖️ There’s no visibility into whether an answer is a weird edge case or a strong shared prior
+Thoth turns the models themselves into a **modern oracle**:
 
-### The Idea
+1. Use **greedy, deterministic decoding** so each model gives its **highest‑confidence answer**.
+2. Ask multiple **frontier models from different vendors** the same question.
+3. Only speak with authority when they **strongly agree**.
 
-Instead of asking *"What does one model say?"*, we ask:
-
-> **"What do multiple strong models say when you remove randomness—and how strongly do they agree?"**
-
-High agreement ≈ a strong shared prior in human data.
-Low agreement ≈ ambiguity, controversy, or hallucination risk.
+The result is a **golden answer** plus a **consensus score** that reflects how stable that answer is across models.
 
 ---
 
-## ✅ What It Does
+## 🧩 What Thoth Does
 
-1. Takes a **short natural-language question** from the user
-2. Calls multiple LLM providers with **deterministic decoding**:
+1. You (or your agent) send a **short question** to Thoth.
+2. Thoth calls multiple LLMs via **Vertex AI** with deterministic decoding, for example:
+   - Gemini 3.0 Flash Lite
+   - Claude 4 Haiku
+   - Llama 4 (via Model Garden)
+3. Thoth **compares their answers** (exact match + embeddings).
+4. Thoth computes a **consensus score** in `[0, 1]` and a label:
+   - **Strong consensus** — models strongly agree; safe to treat as golden answer
+   - **Partial consensus** — some agreement, some variation; use with caution
+   - **Disagreement** — models diverge; no single golden answer
+5. Thoth returns:
+   - A **golden answer** when consensus is strong
+   - Each model’s raw answer for transparency
+   - The consensus score + label
 
-   * `temperature = 0`
-   * `top_p = 1.0`
-   * `top_k = 1` (or closest equivalent)
-3. Collects each model’s answer
-4. Computes an **agreement score** (exact match + embedding similarity)
-5. Returns:
+You can:
 
-   * Each model’s answer
-   * A **consensus score** in `[0, 1]`
-   * A label: **Strong / Partial / Disagreement**
-
-This gives you a quick sense of **where models converge or diverge**.
-
----
-
-## 🏗️ Architecture Snapshot
-
-**Frontend**
-
-* **Next.js** (App Router) for both frontend and API routes
-* **Tailwind CSS** for rapid, consistent UI styling
-* Question input + results panel with:
-
-  * model answers
-  * consensus meter
-
-**Backend & Infrastructure**
-
-* **Firebase** for hosting, backend services, and optional persistence
-* **Vertex AI** (via Google Cloud) to access multiple LLM providers (Gemini, etc.) through a unified interface
-* `/api/ask` endpoint:
-
-  * validates the question
-  * calls multiple LLM APIs via Vertex AI with deterministic settings
-  * computes pairwise similarity between answers
-  * returns structured JSON to the frontend
-
-**Consensus Engine (MVP)**
-
-1. Normalize answers (lowercase, trim, strip punctuation)
-2. If all strings are equal → `consensusScore = 1.0`
-3. Otherwise:
-
-   * compute embeddings for each answer (using Vertex AI embeddings)
-   * average pairwise cosine similarity → `consensusScore`
-4. Map score to label:
-
-   * `>= 0.90` → **Strong consensus**
-   * `0.70–0.89` → **Partial consensus**
-   * `< 0.70` → **Disagreement**
+- Use the web UI as a **truth‑prior checker**.
+- Integrate the API into **agents, eval pipelines, or internal tools**.
 
 ---
 
-## ⚡ Quickstart
+## 🏗️ Architecture
 
-> Exact commands may evolve as the codebase matures.
+Thoth is deliberately built on a focused, opinionated stack:
 
-### Prerequisites
+- **Framework**: Next.js (App Router) — frontend and backend in one codebase.
+- **Backend & Hosting**: Firebase
+  - Firebase Hosting for serving the Next.js app.
+  - Firebase Auth for user sign‑in (optional but recommended).
+  - Firestore for logging questions, answers, and consensus scores.
+- **LLM Gateway**: Vertex AI
+  - Access Gemini, Claude, Llama (and others) through a single, managed interface.
+  - Use **Application Default Credentials (ADC)** instead of hard‑coding provider keys.
+- **Styling**: Tailwind CSS
 
-* Node.js & npm
-* Google Cloud Platform project with Vertex AI API enabled
-* Firebase project (optional for local dev, required for deployment)
-* `gcloud` CLI installed and authenticated
+**Core components (MVP):**
 
-### Setup
+- `app/page.tsx` — main **Ask Thoth** page.
+- `app/api/thoth/route.ts` — API route that:
+  - Validates the question.
+  - Calls Vertex AI for multiple models in parallel with `temperature = 0`, `top_k = 1`.
+  - Computes the consensus score and label.
+  - Selects a golden answer when appropriate.
+- Firestore collections for:
+  - `questions` (question text, user, timestamp)
+  - `answers` (per‑model answers, latencies)
+  - `consensus` (score, label, golden answer)
 
-1. **Clone the repository**
+---
 
-   ```bash
-   git clone https://github.com/ShipFail/consensus-oracle.git
-   cd consensus-oracle
-   npm install
-   ```
+## ⚙️ Setup & Development
 
-2. **Configure Google Cloud Credentials**
+> These steps describe the intended setup for the Next.js + Firebase + Vertex AI implementation.
 
-   Ensure you have Application Default Credentials (ADC) set up so the app can access Vertex AI:
+### 1. Prerequisites
 
-   ```bash
-   gcloud auth application-default login
-   ```
+- **Node.js** and **npm** installed.
+- A **Google Cloud** project with **Vertex AI** enabled.
+- A **Firebase** project linked to that Google Cloud project.
+- `gcloud` CLI installed and authenticated.
 
-3. **Environment Variables**
+### 2. Clone and Install
 
-   Create `.env.local`:
+```bash
+git clone https://github.com/ShipFail/consensus-oracle.git
+cd consensus-oracle
+npm install
+```
 
-   ```bash
-   cp .env.example .env.local
-   ```
+### 3. Configure Google Cloud ADC
 
-   Configure your Google Cloud project details:
+Set up **Application Default Credentials** so the Next.js backend can call Vertex AI:
 
-   ```env
-   GOOGLE_CLOUD_PROJECT_ID=your-project-id
-   GOOGLE_CLOUD_LOCATION=us-central1
-   ```
+```bash
+gcloud auth application-default login
+```
 
-4. **Run the dev server**
+Ensure your active configuration points to the correct project.
 
-   ```bash
-   npm run dev
-   ```
+### 4. Environment Variables
+
+Create `.env.local` in the project root (if it does not exist yet):
+
+```bash
+cp .env.example .env.local
+```
+
+Then configure at least:
+
+```env
+GOOGLE_CLOUD_PROJECT_ID=your-project-id
+GOOGLE_CLOUD_LOCATION=us-central1
+FIREBASE_PROJECT_ID=your-firebase-project-id
+# Any other Firebase/Next.js config as needed
+```
+
+### 5. Run the Dev Server
+
+```bash
+npm run dev
+```
 
 Then open:
 
@@ -171,71 +147,84 @@ Then open:
 http://localhost:3000
 ```
 
-Ask something like:
+Ask questions like:
 
-* `Tell me a joke`
-* `What is the capital of France?`
-* `Who wrote 1984?`
+- `Tell me a joke`
+- `What is the capital of France?`
+- `Who wrote 1984?`
 
-…and watch the consensus meter.
-
----
-
-## 👀 Example
-
-**Question**
-
-> `Tell me a joke`
-
-**Hypothetical answers**
-
-* GPT‑4.x: Why did the chicken cross the road? To get to the other side.
-* Gemini 2.0: Why did the chicken cross the road? To get to the other side.
-* Claude 3.5 Sonnet: Why did the scarecrow win an award? Because he was outstanding in his field.
-
-**Consensus**
-
-* Two identical, one very similar dad joke
-* High embedding similarity → **Strong consensus**
-
-This is exactly the kind of emergent behavior the app is designed to reveal.
+…and watch Thoth return a golden answer and a consensus score.
 
 ---
 
-## 🚫 What This Project Is *Not*
+## 🔌 API Shape (MVP)
 
-* ❌ A philosophical truth oracle
-* ❌ A replacement for human judgment
-* ❌ A tool for resolving politics, ethics, or values
+**Endpoint**
 
-It **is**:
+```http
+POST /api/thoth
+```
 
-* ✅ A probe into **shared priors** across models
-* ✅ A quick **hallucination / weirdness check**
-* ✅ A fun way to demo and study LLM behavior
+**Request**
+
+```json
+{
+  "question": "Who wrote 1984?"
+}
+```
+
+**Response (example)**
+
+```json
+{
+  "question": "Who wrote 1984?",
+  "goldenAnswer": "1984 was written by George Orwell.",
+  "consensusScore": 0.98,
+  "consensusLabel": "strong_consensus",
+  "models": [
+    { "name": "gemini-3.0-flash-lite", "provider": "google", "answer": "1984 was written by George Orwell.", "latencyMs": 530 },
+    { "name": "claude-4-haiku", "provider": "anthropic", "answer": "The novel '1984' was written by George Orwell.", "latencyMs": 610 },
+    { "name": "llama-4", "provider": "meta", "answer": "1984 was written by George Orwell.", "latencyMs": 700 }
+  ]
+}
+```
+
+Agents can treat `goldenAnswer` as the action plan when `consensusLabel` is strong, and fall back to other strategies when it is not.
 
 ---
 
-## 🗺️ Roadmap (Ideas)
+## 🧠 Interpreting Thoth’s Answers
 
-* Better similarity metrics (NLI, task‑aware scoring)
-* Auto‑tagging questions (facts vs opinions vs predictions)
-* Human voting: compare human vs model consensus
-* Dashboards: top agreements / disagreements
-* Simple JSON API for agents and other apps
+- **High consensus** means:
+  - Multiple large, independently‑trained LLMs, under deterministic decoding, produced **very similar answers**.
+  - There is likely a strong **shared prior** in human training data.
+
+- **Low consensus** means:
+  - The question is ambiguous, controversial, or under‑specified, or
+  - Models are trained/aligned differently on this topic.
+
+Thoth is explicit about what it is doing: it is not discovering metaphysical truth; it is surfacing the **best aggregate signal** we can get from the models we already rely on.
+
+---
+
+## 🗺️ Roadmap Ideas
+
+- Better consensus metrics (NLI, task‑aware scoring).
+- User accounts and saved Thoth sessions in Firestore.
+- Export mode for research (CSV of questions + answers + scores).
+- Fine‑grained control over which models participate.
+- Simple SDKs (TypeScript, Python) for calling the Thoth API.
 
 ---
 
 ## 🤝 Contributing
 
-PRs, issues, and ideas are very welcome.
+Ideas, issues, and pull requests are welcome.
 
-* File bugs or confusing behavior
-* Propose better consensus metrics
-* Add support for more providers
-* Improve docs and examples
+- If you care about evals, safety, or epistemology, help us design better consensus metrics.
+- If you build agents, help define what a **good truth‑prior check** looks like in real workflows.
 
-Basic flow:
+Basic dev loop:
 
 ```bash
 git clone https://github.com/ShipFail/consensus-oracle.git
@@ -254,6 +243,6 @@ MIT. See [`LICENSE`](./LICENSE).
 
 ## 🧭 Final Thought
 
-When you strip away randomness and ask **many models the same question**, you start to see the **shape of our shared training data**.
+When you remove randomness and ask **many strong models** the same question, you start to see where the world’s written knowledge has a **stable answer** and where it does not.
 
-**LLM Consensus Oracle** is a small tool for exploring that shape — and maybe, just a little, for estimating what we collectively treat as “obviously true.”
+**Thoth** is a small step toward giving humans and agents a **single place to ask for the best available answer**, with the humility to say when the models themselves disagree.
