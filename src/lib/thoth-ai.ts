@@ -3,7 +3,7 @@
 import { ai, deterministicConfig } from '@/ai/genkit';
 import { generateGoldenTruthAnswer } from '@/ai/flows/generate-golden-truth-answer';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
-import { model } from 'genkit/model';
+import { model } from 'genkit';
 
 const modelReferences = [
   model('googleai/gemini-2.5-flash'),
