@@ -1,4 +1,5 @@
-import { generateContent } from './vertex-client';
+import { generateContent } from '../vertex-client';
+import { GOLDEN_TRUTH_MODEL } from './config';
 
 export interface GenerateGoldenTruthAnswerInput {
   question: string;
@@ -41,7 +42,7 @@ Please ensure the "goldenTruthAnswer" directly answers the "question" based on t
     // Using gemini-3.0-flash-lite as a good balance of speed and reasoning for this aggregation task
     // We request JSON output via responseMimeType
     const responseText = await generateContent(
-      'gemini-3.0-flash-lite', 
+      GOLDEN_TRUTH_MODEL, 
       prompt, 
       { 
         temperature: 0.5, 

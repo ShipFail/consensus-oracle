@@ -1,13 +1,11 @@
 'use server';
 
 import { generateContent } from '@/lib/vertex-client';
-import { generateGoldenTruthAnswer } from '@/lib/golden-truth';
+import { generateGoldenTruthAnswer } from '@/lib/vertex-ai/golden-truth';
+import { MODEL_IDS } from '@/lib/vertex-ai/config';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
 
-const modelNames = [
-  'googleai/gemini-3.0-flash-lite',
-  'anthropic/claude-haiku-4.5',
-];
+const modelNames = Object.values(MODEL_IDS);
 
 async function getSingleAnswer(
   question: string,
