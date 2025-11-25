@@ -12,6 +12,8 @@
 
 ---
 
+Thoth is your cross-model consensus oracle, not another single-model LLM wrapper.
+
 ## ✨ Why Thoth
 
 When people want a **truthful answer they can trust** today, they usually:
