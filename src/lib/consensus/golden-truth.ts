@@ -1,5 +1,12 @@
-import { generateContent } from '../vertex-client';
-import { GOLDEN_TRUTH_MODEL } from './config';
+/**
+ * Golden Truth Consensus Computation
+ *
+ * This module uses a meta-LLM approach to determine consensus among multiple model answers.
+ * It analyzes responses from different models and returns a "golden truth" answer when they agree.
+ */
+
+import * as Google from '../vertex-ai/google';
+import type { GoogleGenerationConfig } from '../vertex-ai/google.types';
 
 export interface GenerateGoldenTruthAnswerInput {
   question: string;
@@ -13,6 +20,14 @@ export interface GenerateGoldenTruthAnswerOutput {
   summary: string;
 }
 
+/**
+ * Generate a golden truth answer by analyzing consensus among multiple model responses
+ *
+ * Uses Gemini 2.5 Flash Lite as a meta-judge to evaluate agreement between models.
+ *
+ * @param input - Question and array of model answers
+ * @returns Golden truth answer with confidence score and label
+ */
 export async function generateGoldenTruthAnswer(
   input: GenerateGoldenTruthAnswerInput
 ): Promise<GenerateGoldenTruthAnswerOutput> {
@@ -39,15 +54,17 @@ Please ensure the "goldenTruthAnswer" directly answers the "question" based on t
 `;
 
   try {
-    // Using gemini-3.0-flash-lite as a good balance of speed and reasoning for this aggregation task
+    // Using gemini-2.5-flash-lite as a good balance of speed and reasoning for this aggregation task
     // We request JSON output via responseMimeType
-    const responseText = await generateContent(
-      GOLDEN_TRUTH_MODEL, 
-      prompt, 
-      { 
-        temperature: 0.5, 
-        responseMimeType: 'application/json' 
-      }
+    const config: GoogleGenerationConfig = {
+      temperature: 0.5,
+      responseMimeType: 'application/json'
+    };
+
+    const responseText = await Google.generateContent(
+      Google.MODELS.GEMINI_2_5_FLASH_LITE,
+      prompt,
+      config as any  // Cast needed due to Google-specific field
     );
 
     const result = JSON.parse(responseText) as GenerateGoldenTruthAnswerOutput;

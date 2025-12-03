@@ -1,7 +1,8 @@
 'use server';
 
-import { generateContent } from '@/lib/vertex-client';
-import { generateGoldenTruthAnswer } from '@/lib/vertex-ai/golden-truth';
+import * as Google from '@/lib/vertex-ai/google';
+import * as Anthropic from '@/lib/vertex-ai/anthropic';
+import { generateGoldenTruthAnswer } from '@/lib/consensus/golden-truth';
 import { MODEL_IDS } from '@/lib/vertex-ai/config';
 import type { ModelAnswer, GoldenTruthResult } from '@/lib/types';
 
@@ -13,9 +14,20 @@ async function getSingleAnswer(
 ): Promise<ModelAnswer> {
   try {
     const prompt = `You are an AI Model. In one or two sentences, provide the best possible answer for the following question. Be direct and concise. Question: ${question}`;
-    
-    const output = await generateContent(modelName, prompt, { temperature: 0, topK: 1 });
-    
+
+    let output: string;
+
+    // Route to appropriate provider based on model name
+    if (modelName.startsWith('anthropic/') || modelName.includes('claude')) {
+      // Anthropic Claude model
+      const cleanModel = modelName.replace(/^anthropic\//, '');
+      output = await Anthropic.generateContent(cleanModel, prompt, { temperature: 0, topK: 1 });
+    } else {
+      // Google Gemini model (default)
+      const cleanModel = modelName.replace(/^googleai\//, '');
+      output = await Google.generateContent(cleanModel, prompt, { temperature: 0, topK: 1 });
+    }
+
     return {
       modelName: modelName.replace(/^(googleai|anthropic)\//, ''),
       answer: output || 'No answer could be generated.',
