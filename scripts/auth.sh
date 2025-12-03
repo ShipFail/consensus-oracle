@@ -2,6 +2,9 @@
 # This project depends on Google Cloud Vertex AI with ADC authentication. 
 # During local development, we have to auth for running testing code and everything right. 
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" >/dev/null 2>&1 && pwd)"
+source "$SCRIPT_DIR/../.env"
+
 if gcloud auth application-default print-access-token > /dev/null; then
     echo "GCloud ADC Valid"
 else
