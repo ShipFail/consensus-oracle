@@ -32,6 +32,9 @@ export interface GoogleGenerationConfig {
   /** Sequences that stop generation. */
   stopSequences?: string[];
 
+  /** Random seed for best-effort deterministic generation (Gemini 2.5+). */
+  seed?: number;
+
   /** Response MIME type. Use 'application/json' for structured output. */
   responseMimeType?: string;
 }

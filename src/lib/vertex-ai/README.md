@@ -93,8 +93,10 @@ interface GenerationConfig {
   temperature?: number;        // 0.0-2.0 (0 = deterministic, higher = creative)
   topK?: number;               // Number of top tokens to sample from
   topP?: number;               // Cumulative probability threshold (0.0-1.0)
+  seed?: number;               // Random seed for best-effort reproducibility
   maxOutputTokens?: number;    // Maximum tokens to generate
-  stopSequences?: string[];    // Sequences that stop generation
+  stopSequences?: string | string[]; // Sequences that stop generation
+  stream?: boolean;            // Enable streaming responses when supported
 }
 ```
 

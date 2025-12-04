@@ -18,20 +18,34 @@ import assert from 'node:assert';
 import { generateContent, MODELS } from './anthropic';
 
 describe('Anthropic Claude Provider', () => {
-  it('should generate content with deterministic settings ("Tell me a joke")', async () => {
+  it('should generate content with deterministic settings ("Tell me a joke")', async (t) => {
     // Test configuration as specified
     const prompt = 'Tell me a joke';
     const config = {
       temperature: 0,
-      topK: 1
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 128
     };
 
     console.log(`\n🧪 Testing Anthropic Claude: ${MODELS.CLAUDE_HAIKU_4_5}`);
     console.log(`📝 Prompt: "${prompt}"`);
-    console.log(`⚙️  Config: temperature=${config.temperature}, topK=${config.topK}`);
+    console.log(`⚙️  Config: ${JSON.stringify(config)}`);
 
-    // Make the API call
-    const result = await generateContent(MODELS.CLAUDE_HAIKU_4_5, prompt, config);
+    let result: string;
+    try {
+      result = await generateContent(MODELS.CLAUDE_HAIKU_4_5, prompt, config);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // Skip when the model is not available in the configured region
+      if (message.includes('404')) {
+        t.skip(
+          `Claude model unavailable in region ${process.env.CLAUDE_LOCATION || process.env.GCP_LOCATION || 'global'}: ${message}`
+        );
+        return;
+      }
+      throw error;
+    }
 
     // Assertions
     assert.ok(result, 'Result should not be empty');

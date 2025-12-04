@@ -4,15 +4,16 @@
 
 ## Endpoint
 
-Use this endpoint format:
+Use this endpoint format (native Vertex AI generateContent):
 
 ```
-POST https://{location}-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/endpoints/openapi/chat/completions
+POST https://{location}-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/meta/models/{model}:generateContent
 ```
 
 Variables:
 - `{location}`: Region (e.g., `us-central1`)
 - `{project}`: Your GCP project ID
+- `{model}`: Meta model ID without the `meta/` prefix (e.g., `llama-4-maverick-17b-128e-instruct-maas`)
 
 **Official Reference**: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/partner-models/llama/use-llama
 
@@ -21,100 +22,66 @@ Variables:
 ```typescript
 import { z } from 'zod';
 
-// Message Schema
-const LlamaMessageSchema = z.object({
+// Message Schema (Vertex contents/parts)
+const LlamaContentSchema = z.object({
   role: z.enum(['system', 'user', 'assistant'])
     .describe("Message role. First message MUST be 'user'"),
-  content: z.string()
-    .describe("Message text content")
+  parts: z.array(z.object({
+    text: z.string().optional()
+  }))
+    .describe("Content parts; text-only supported here")
 });
 
-// Safety Settings Schema
-const LlamaSafetySettingsSchema = z.object({
-  enabled: z.boolean()
-    .describe("Enable Llama Guard 3 safety filtering"),
-  llama_guard_settings: z.object({}).passthrough().optional()
-    .describe("Additional Llama Guard configuration")
+// Generation Config
+const LlamaGenerationConfigSchema = z.object({
+  temperature: z.number().min(0).max(2).optional()
+    .describe("Randomness. 0=deterministic, 2=creative. Default: 1.0"),
+  topP: z.number().min(0).max(1).optional()
+    .describe("Nucleus sampling: cumulative probability threshold"),
+  topK: z.number().int().positive().optional()
+    .describe("Limit selection to top K tokens"),
+  maxOutputTokens: z.number().int().positive().optional()
+    .describe("Maximum tokens to generate"),
+  stopSequences: z.array(z.string()).optional()
+    .describe("Stop generation when any of these strings appear"),
+  seed: z.number().int().optional()
+    .describe("Random seed for best-effort determinism; default is random")
 });
 
 // Complete Request Schema
 const LlamaRequestSchema = z.object({
-  model: z.string()
-    .describe("Model name with provider prefix (e.g., 'meta/llama-3.3-70b-instruct-maas')"),
-  messages: z.array(LlamaMessageSchema)
+  contents: z.array(LlamaContentSchema)
     .describe("Conversation history. First message MUST be 'user' role"),
-  max_tokens: z.number().int().positive().optional()
-    .describe("Maximum tokens to generate"),
-  temperature: z.number().min(0).max(2).optional()
-    .describe("Randomness. 0=deterministic, 2=creative. Default: 1.0"),
-  top_p: z.number().min(0).max(1).optional()
-    .describe("Nucleus sampling: cumulative probability threshold"),
-  top_k: z.number().int().positive().optional()
-    .describe("Limit selection to top K tokens"),
-  stop: z.union([z.string(), z.array(z.string())]).optional()
-    .describe("Stop generation when any of these strings appear"),
-  stream: z.boolean().optional()
-    .describe("Enable streaming response"),
-  extra_body: z.object({
-    google: z.object({
-      model_safety_settings: LlamaSafetySettingsSchema.optional()
-        .describe("Google Cloud safety settings (Llama Guard)")
-    }).optional()
-      .describe("Google-specific configurations")
-  }).optional()
-    .describe("Additional request body parameters")
+  generationConfig: LlamaGenerationConfigSchema.optional()
+    .describe("Sampling and limit configuration")
 });
 ```
 
 ## Response Schema
 
 ```typescript
-// Message Response Schema
-const LlamaMessageResponseSchema = z.object({
-  role: z.literal('assistant')
-    .describe("Responder role (always 'assistant')"),
-  content: z.string()
-    .describe("Generated text content")
-});
-
-// Choice Schema
-const LlamaChoiceSchema = z.object({
-  index: z.number().int()
-    .describe("Index of this choice"),
-  message: LlamaMessageResponseSchema
-    .describe("Generated message"),
-  finish_reason: z.enum(['stop', 'length']).nullable()
-    .describe("Why generation stopped: stop=natural end, length=max_tokens hit")
-});
-
-// Usage Schema
-const LlamaUsageSchema = z.object({
-  prompt_tokens: z.number().int()
-    .describe("Tokens in input prompt"),
-  completion_tokens: z.number().int()
-    .describe("Tokens in generated completion"),
-  total_tokens: z.number().int()
-    .describe("Total tokens (prompt + completion)")
+// Candidate Schema
+const LlamaCandidateSchema = z.object({
+  content: LlamaContentSchema
+    .describe("Generated assistant content"),
+  finishReason: z.string().nullable().optional()
+    .describe("Why generation stopped (e.g., STOP, MAX_TOKENS)")
 });
 
 // Complete Response Schema
 const LlamaResponseSchema = z.object({
-  id: z.string()
-    .describe("Unique completion ID"),
-  object: z.literal('chat.completion')
-    .describe("Object type (always 'chat.completion')"),
-  created: z.number().int()
-    .describe("Unix timestamp of generation"),
-  model: z.string()
-    .describe("Model that generated the response"),
-  choices: z.array(LlamaChoiceSchema)
-    .describe("Array of generated choices"),
-  usage: LlamaUsageSchema
-    .describe("Token usage statistics")
+  candidates: z.array(LlamaCandidateSchema).optional()
+    .describe("Array of generated candidates"),
+  promptFeedback: z.object({
+    blockReason: z.string().optional()
+  }).optional()
+    .describe("Safety block feedback when applicable")
 });
 
-// Extract text from response
-const text = response.choices[0].message.content;
+// Extract text from first candidate
+const text = response.candidates?.[0]?.content?.parts
+  ?.map(part => part.text || '')
+  .join('') || '';
 ```
 
 ## Verified Model Names
@@ -140,7 +107,8 @@ meta/llama-3.1-8b-instruct-maas                 (Llama 3.1 8B)
 
 - **Model prefix**: MUST include `meta/` prefix
 - **-maas suffix**: ALL Llama models MUST include `-maas` suffix (Model-as-a-Service)
+- **Endpoint path**: For `.../publishers/meta/models/{model}:generateContent`, use the model ID *without* the `meta/` prefix (the helper normalizes this).
 - **First message role**: First message in array MUST have `role='user'` (not system)
 - **Llama Guard**: Enabled by default on all predictions
-- Set `temperature=0` and `top_k=1` for deterministic generation
-- **seed parameter**: NOT supported on Llama models
+- Set `temperature=0`, `top_k=1`, and `seed=42` for best-effort deterministic generation
+- **seed parameter**: Supported (best effort determinism). Default is random seed.

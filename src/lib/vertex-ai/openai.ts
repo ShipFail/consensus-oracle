@@ -7,20 +7,23 @@
  * Official Documentation:
  * - OpenAI on Vertex AI: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/maas/openai
  * - GPT-OSS 120B: https://docs.cloud.google.com/vertex-ai/generative-ai/docs/maas/openai/gpt-oss-120b
- * - rawPredict Endpoint: https://docs.cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.publishers.models/rawPredict
+ * - generateContent Endpoint: https://docs.cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.publishers.models/generateContent
  *
  * Authentication:
  * - Requires Application Default Credentials (ADC)
  * - Setup: gcloud auth application-default login
  * - See: https://cloud.google.com/docs/authentication/application-default-credentials
  *
- * Note: OpenAI models use the rawPredict endpoint (not generateContent)
+ * Note: OpenAI models use the native Vertex AI generateContent endpoint.
  *       These are open-weight models released under Apache 2.0 license, NOT GPT-4 or GPT-3.5
  */
 
 import { getAccessToken, PROJECT_ID, LOCATION } from './config';
 import type { GenerationConfig } from './types';
-import type { OpenAIRequestConfig, OpenAIResponse } from './openai.types';
+import type {
+  OpenAIGenerateContentRequest,
+  OpenAIGenerateContentResponse
+} from './openai.types';
 
 /**
  * Available OpenAI open-weight models via Vertex AI Model Garden
@@ -38,7 +41,7 @@ export const MODELS = {
 /**
  * Generate content using OpenAI GPT models via Vertex AI
  *
- * This function calls the OpenAI Chat Completions API via Vertex AI's rawPredict endpoint.
+ * This function calls the OpenAI GPT models via Vertex AI's native generateContent endpoint.
  * It supports text generation with configurable parameters.
  *
  * @param model - OpenAI model ID (use MODELS constants or custom string)
@@ -80,31 +83,36 @@ export async function generateContent(
   // Get authentication token
   const accessToken = await getAccessToken();
 
-  // Ensure model name has openai/ prefix
+  // Normalize model name (strip openai/ for endpoint path)
   const fullModelName = model.startsWith('openai/') ? model : `openai/${model}`;
+  const cleanModelName = fullModelName.replace(/^openai\//, '');
 
-  // Build Vertex AI endpoint URL for OpenAI models
-  // Format: https://{location}-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/endpoints/openapi/chat/completions
+  // Build Vertex AI endpoint URL for OpenAI models (native generateContent)
+  // Format: https://{location}-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/openai/models/{model}:generateContent
   const endpoint = [
     `https://${LOCATION}-aiplatform.googleapis.com`,
     `/v1/projects/${PROJECT_ID}`,
     `/locations/${LOCATION}`,
-    `/endpoints/openapi/chat/completions`
+    `/publishers/openai/models/${cleanModelName}:generateContent`
   ].join('');
 
-  // Construct OpenAI Chat Completions API request body
-  // Note: OpenAI doesn't support topK parameter
-  const requestBody: OpenAIRequestConfig = {
-    model: fullModelName,
-    messages: [{
+  const stopSequences = config?.stopSequences
+    ? Array.isArray(config.stopSequences) ? config.stopSequences : [config.stopSequences]
+    : undefined;
+
+  // Construct OpenAI generateContent request body
+  const requestBody: OpenAIGenerateContentRequest = {
+    contents: [{
       role: 'user',
-      content: prompt
+      parts: [{ text: prompt }]
     }],
-    max_tokens: config?.maxOutputTokens || 1024,
-    temperature: config?.temperature ?? 1.0, // OpenAI default is 1.0
-    top_p: config?.topP,
-    stop: config?.stopSequences
-    // Note: topK is not supported by OpenAI
+    generationConfig: {
+      temperature: config?.temperature ?? 1.0,
+      topP: config?.topP,
+      maxOutputTokens: config?.maxOutputTokens || 1024,
+      stopSequences,
+      seed: config?.seed
+    }
   };
 
   // Make API call
@@ -130,41 +138,47 @@ export async function generateContent(
   }
 
   // Parse response
-  const data = await response.json() as OpenAIResponse;
+  const data = await response.json() as OpenAIGenerateContentResponse;
 
   // Validate response structure
-  if (!data.choices || data.choices.length === 0) {
+  if (!data.candidates || data.candidates.length === 0) {
+    // Check if prompt was blocked
+    if (data.promptFeedback?.blockReason) {
+      throw new Error(
+        `Prompt was blocked by safety filters: ${data.promptFeedback.blockReason}\n` +
+        `Model: ${fullModelName}`
+      );
+    }
     throw new Error(
-      `No choices returned from OpenAI GPT API\n` +
+      `No candidates returned from OpenAI GPT API\n` +
       `Model: ${fullModelName}\n` +
       `Response: ${JSON.stringify(data)}`
     );
   }
 
-  // Extract the first choice
-  const choice = data.choices[0];
+  const candidate = data.candidates[0];
 
-  // Validate message structure
-  if (!choice.message || !choice.message.content) {
+  // Validate content structure
+  if (!candidate.content?.parts) {
     throw new Error(
-      `Invalid message structure from OpenAI GPT API\n` +
+      `Invalid response structure from OpenAI GPT API\n` +
       `Model: ${fullModelName}\n` +
-      `Choice: ${JSON.stringify(choice)}`
+      `Candidate: ${JSON.stringify(candidate)}`
     );
   }
 
   // Check finish reason
-  if (choice.finish_reason === 'length') {
+  if (candidate.finishReason === 'MAX_TOKENS') {
     console.warn(
-      `Warning: Response truncated at max_tokens limit for model ${fullModelName}\n` +
+      `Warning: Response truncated at maxOutputTokens limit for model ${fullModelName}\n` +
       `Consider increasing maxOutputTokens in config.`
-    );
-  } else if (choice.finish_reason === 'content_filter') {
-    throw new Error(
-      `Response blocked by content filter (model: ${fullModelName})\n` +
-      `The content was flagged by OpenAI's safety system.`
     );
   }
 
-  return choice.message.content;
+  const text = candidate.content.parts
+    .filter(part => part.text)
+    .map(part => part.text)
+    .join('');
+
+  return text;
 }

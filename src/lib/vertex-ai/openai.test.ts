@@ -19,24 +19,38 @@ import assert from 'node:assert';
 import { generateContent, MODELS } from './openai';
 
 describe('OpenAI GPT Provider', () => {
-  it('should generate content with deterministic settings ("Tell me a joke")', async () => {
+  it('should generate content with deterministic settings ("Tell me a joke")', async (t) => {
     // Test configuration as specified
     const prompt = 'Tell me a joke';
     const config = {
       temperature: 0,
-      topK: 1  // Note: OpenAI doesn't use topK, but we keep consistent API
+      topP: 1,
+      seed: 42,
+      maxOutputTokens: 128
     };
 
     console.log(`\n🧪 Testing OpenAI GPT: ${MODELS.GPT_OSS_20B}`);
     console.log(`📝 Prompt: "${prompt}"`);
-    console.log(`⚙️  Config: temperature=${config.temperature} (topK not supported by OpenAI)`);
+    console.log(`⚙️  Config: ${JSON.stringify(config)}`);
 
-    // Make the API call
-    const result = await generateContent(
-      MODELS.GPT_OSS_20B,
-      prompt,
-      config
-    );
+    let result: string;
+    try {
+      result = await generateContent(
+        MODELS.GPT_OSS_20B,
+        prompt,
+        config
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // Skip when the model is not available in the configured region
+      if (message.includes('404')) {
+        t.skip(
+          `OpenAI GPT-OSS model unavailable in region ${process.env.GCP_LOCATION || 'us-central1'}: ${message}`
+        );
+        return;
+      }
+      throw error;
+    }
 
     // Assertions
     assert.ok(result, 'Result should not be empty');

@@ -21,7 +21,7 @@
  * @property stopSequences - Array of strings that will stop generation when encountered.
  */
 export interface GenerationConfig {
-  /** Temperature (0.0-2.0). Lower values = more deterministic. */
+ /** Temperature (0.0-2.0). Lower values = more deterministic. */
   temperature?: number;
 
   /** Top-K sampling. Number of highest probability tokens to consider. */
@@ -30,11 +30,17 @@ export interface GenerationConfig {
   /** Top-P (nucleus) sampling (0.0-1.0). Cumulative probability threshold. */
   topP?: number;
 
+  /**
+   * Random seed for reproducible results (best effort).
+   * Keep temperature=0 and topK=1 with this seed for deterministic runs.
+   */
+  seed?: number;
+
   /** Maximum number of tokens to generate. */
   maxOutputTokens?: number;
 
-  /** Stop sequences to end generation early. */
-  stopSequences?: string[];
+  /** Stop sequences to end generation early. Accepts a single string or array. */
+  stopSequences?: string | string[];
 
   /** Enable streaming responses (true for streaming, false for single response). */
   stream?: boolean;

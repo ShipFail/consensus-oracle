@@ -1,118 +1,50 @@
 /**
- * Meta Llama API Types
- *
- * Type definitions for Meta Llama models via Vertex AI Model Garden.
- * Uses a similar format to OpenAI's Chat Completions API.
+ * Meta Llama API Types (Vertex AI native generateContent schema)
  *
  * Official Documentation:
- * - Llama on Vertex AI: https://cloud.google.com/vertex-ai/generative-ai/docs/open-models/use-llama
- * - Llama Models: https://cloud.google.com/vertex-ai/generative-ai/docs/open-models/llama-models
- * - Model Garden: https://cloud.google.com/model-garden
+ * - https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/llama/use-llama
  */
 
-/**
- * Message role in a conversation
- */
+/** Message role */
 export type MetaRole = 'system' | 'user' | 'assistant';
 
-/**
- * Message in a conversation
- */
-export interface MetaMessage {
-  /** Role of the message sender */
+/** Content part (text only for now) */
+export interface MetaPart {
+  text?: string;
+}
+
+/** Message content */
+export interface MetaContent {
   role: MetaRole;
-
-  /** Content of the message */
-  content: string;
+  parts: MetaPart[];
 }
 
-/**
- * Meta Llama API request configuration
- */
-export interface MetaRequestConfig {
-  /** Array of messages in the conversation */
-  messages: MetaMessage[];
-
-  /** Maximum tokens to generate */
-  max_tokens?: number;
-
-  /** Temperature (0.0-2.0). Lower = more deterministic. */
+/** Generation config */
+export interface MetaGenerationConfig {
   temperature?: number;
-
-  /** Top-P (nucleus) sampling (0.0-1.0) */
-  top_p?: number;
-
-  /** Top-K sampling */
-  top_k?: number;
-
-  /** Stop sequences */
-  stop?: string[];
-
-  /** Enable streaming responses */
-  stream?: boolean;
+  topP?: number;
+  topK?: number;
+  maxOutputTokens?: number;
+  stopSequences?: string[];
+  seed?: number;
 }
 
-/**
- * Choice object in the response
- */
-export interface MetaChoice {
-  /** Index of this choice */
-  index: number;
-
-  /** The generated message */
-  message: {
-    role: 'assistant';
-    content: string;
-  };
-
-  /** Reason generation stopped */
-  finish_reason: 'stop' | 'length' | string;
+/** Request payload for generateContent */
+export interface MetaGenerateContentRequest {
+  contents: MetaContent[];
+  generationConfig?: MetaGenerationConfig;
 }
 
-/**
- * Token usage information
- */
-export interface MetaUsage {
-  /** Number of tokens in the prompt */
-  prompt_tokens: number;
-
-  /** Number of tokens in the completion */
-  completion_tokens: number;
-
-  /** Total tokens used */
-  total_tokens: number;
+/** Candidate in response */
+export interface MetaCandidate {
+  content: MetaContent;
+  finishReason?: string;
 }
 
-/**
- * Complete response from Meta Llama API
- */
-export interface MetaResponse {
-  /** Unique identifier for this completion */
-  id?: string;
-
-  /** Object type */
-  object?: string;
-
-  /** Unix timestamp of when the completion was created */
-  created?: number;
-
-  /** Model used for completion */
-  model?: string;
-
-  /** Array of completion choices */
-  choices: MetaChoice[];
-
-  /** Token usage statistics */
-  usage?: MetaUsage;
-}
-
-/**
- * Error response from Meta Llama API
- */
-export interface MetaError {
-  error: {
-    message: string;
-    type?: string;
-    code?: string;
+/** Response payload for generateContent */
+export interface MetaGenerateContentResponse {
+  candidates?: MetaCandidate[];
+  promptFeedback?: {
+    blockReason?: string;
   };
 }

@@ -109,12 +109,17 @@ export async function generateContent(
   ].join('');
 
   // Map common config to Google-specific format
+  const stopSequences = config?.stopSequences
+    ? Array.isArray(config.stopSequences) ? config.stopSequences : [config.stopSequences]
+    : undefined;
+
   const generationConfig: GoogleGenerationConfig | undefined = config ? {
     temperature: config.temperature,
     topK: config.topK,
     topP: config.topP,
     maxOutputTokens: config.maxOutputTokens,
-    stopSequences: config.stopSequences,
+    stopSequences,
+    seed: (config as GoogleGenerationConfig).seed,
     // Note: responseMimeType is Google-specific, cast config if needed
     responseMimeType: (config as GoogleGenerationConfig).responseMimeType
   } : undefined;

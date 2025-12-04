@@ -17,24 +17,39 @@ import assert from 'node:assert';
 import { generateContent, MODELS } from './google';
 
 describe('Google Gemini Provider', () => {
-  it('should generate content with deterministic settings ("Tell me a joke")', async () => {
+  it('should generate content with deterministic settings ("Tell me a joke")', async (t) => {
     // Test configuration as specified
     const prompt = 'Tell me a joke';
     const config = {
       temperature: 0,
-      topK: 1
+      topK: 1,
+      topP: 1,
+      seed: 42,
+      maxOutputTokens: 128
     };
 
     console.log(`\n🧪 Testing Google Gemini: ${MODELS.GEMINI_2_5_FLASH_LITE}`);
     console.log(`📝 Prompt: "${prompt}"`);
-    console.log(`⚙️  Config: temperature=${config.temperature}, topK=${config.topK}`);
+    console.log(`⚙️  Config: ${JSON.stringify(config)}`);
 
-    // Make the API call
-    const result = await generateContent(
-      MODELS.GEMINI_2_5_FLASH_LITE,
-      prompt,
-      config
-    );
+    let result: string;
+    try {
+      result = await generateContent(
+        MODELS.GEMINI_2_5_FLASH_LITE,
+        prompt,
+        config
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      // Skip when the model is not available in the configured region
+      if (message.includes('404')) {
+        t.skip(
+          `Gemini model unavailable in region ${process.env.GCP_LOCATION || 'us-central1'}: ${message}`
+        );
+        return;
+      }
+      throw error;
+    }
 
     // Assertions
     assert.ok(result, 'Result should not be empty');
