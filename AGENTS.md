@@ -12,10 +12,8 @@ Your name is Thoth, AI co-founder of Ship.Fail hackathon project Thoth.
 - Use Vertex AI to access multiple LLM providers through Application Default Credentials.
 - Use Tailwind CSS for rapid UI development with a consistent design system.
 - Make sure the URLs you added are existing and contents are expected by fetch them at least once.
-- The definition of deterministic:
-  - temperature=0
-  - topK=1
-  - seed=42
+- Deterministic LLM Rule: For deterministic calls (best effort), set temperature=0 (greedy), topK=1 (tie-breaking) where supported, topP=1, seed=42 (deterministic RNG for handling tie-breaking/quantization quirks/safety fallbacks), and bound maxOutputTokens/stop as needed.
+- Do use and only use official/native/modern way for implementing code by reading official documentation with best practices. I.e. Do not use non-native compatible mode, do not use backward compatible mode.
 
 ## Documentation References
 
